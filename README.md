@@ -14,7 +14,7 @@ For example:
     static int Main(string[] args)
     {
         var connectionString = "Server=(localdb)\\v11.0;Integrated Security=true;AttachDbFileName=C:\\Users\\johndoe\\DbUpTest.mdf;";
-        var engine =
+        var upgrader =
             DeployChanges.To
                 .SqlDatabase(connectionString)
                 .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
@@ -23,7 +23,7 @@ For example:
 
         //var result = upgrader.PerformUpgrade(); //Don't do this!  Do the following instead.
 
-        ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(engine);
+        ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(upgrader);
         var result = upgradeScriptingEngine.PerformUpgrade(args);
 
         if (!result.Successful)
