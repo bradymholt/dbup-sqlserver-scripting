@@ -1,0 +1,14 @@
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\bin\Debug\DbUp.Scripting.dll
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\bin\Debug\DbUp.Scripting.pdb
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\bin\Debug\DbUp.dll
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\bin\Debug\Microsoft.SqlServer.ConnectionInfo.dll
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\bin\Debug\Microsoft.SqlServer.ConnectionInfoExtended.dll
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\bin\Debug\Microsoft.SqlServer.Management.Sdk.Sfc.dll
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\bin\Debug\Microsoft.SqlServer.Smo.dll
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\bin\Debug\Microsoft.SqlServer.SmoExtended.dll
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\bin\Debug\Microsoft.SqlServer.SqlClrProvider.dll
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\bin\Debug\Microsoft.SqlServer.SqlEnum.dll
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\bin\Debug\DbUp.xml
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\obj\Debug\DbUp.Scripting.csprojResolveAssemblyReference.cache
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\obj\Debug\DbUp.Scripting.dll
+C:\Users\bholt\Documents\Visual Studio 2013\Projects\DbUp.Scripting\DbUp.Scripting\obj\Debug\DbUp.Scripting.pdb

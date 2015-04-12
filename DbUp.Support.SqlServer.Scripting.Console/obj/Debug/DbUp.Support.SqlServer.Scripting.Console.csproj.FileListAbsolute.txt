@@ -1,0 +1,10 @@
+C:\dev\dbup-sqlserver-scripting\DbUp.Support.SqlServer.Scripting.Console\bin\Debug\DbUp.Support.SqlServer.Scripting.Console.exe.config
+C:\dev\dbup-sqlserver-scripting\DbUp.Support.SqlServer.Scripting.Console\obj\Debug\DbUp.Support.SqlServer.Scripting.Console.csprojResolveAssemblyReference.cache
+C:\dev\dbup-sqlserver-scripting\DbUp.Support.SqlServer.Scripting.Console\bin\Debug\DbUp.Support.SqlServer.Scripting.Console.exe
+C:\dev\dbup-sqlserver-scripting\DbUp.Support.SqlServer.Scripting.Console\bin\Debug\DbUp.Support.SqlServer.Scripting.Console.pdb
+C:\dev\dbup-sqlserver-scripting\DbUp.Support.SqlServer.Scripting.Console\bin\Debug\DbUp.dll
+C:\dev\dbup-sqlserver-scripting\DbUp.Support.SqlServer.Scripting.Console\bin\Debug\DbUp.Support.SqlServer.Scripting.dll
+C:\dev\dbup-sqlserver-scripting\DbUp.Support.SqlServer.Scripting.Console\bin\Debug\DbUp.Support.SqlServer.Scripting.pdb
+C:\dev\dbup-sqlserver-scripting\DbUp.Support.SqlServer.Scripting.Console\bin\Debug\DbUp.xml
+C:\dev\dbup-sqlserver-scripting\DbUp.Support.SqlServer.Scripting.Console\obj\Debug\DbUp.Support.SqlServer.Scripting.Console.exe
+C:\dev\dbup-sqlserver-scripting\DbUp.Support.SqlServer.Scripting.Console\obj\Debug\DbUp.Support.SqlServer.Scripting.Console.pdb

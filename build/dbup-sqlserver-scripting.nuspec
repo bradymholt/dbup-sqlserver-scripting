@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>DbUp SQL Server Object Scripting</title>
+    <authors>Brady Holt</authors>
+    <owners>Brady Holt</owners>
+    <licenseUrl>https://raw.github.com/bradyholt/dbup-sqlserver-scripting/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/bradyholt/dbup-sqlserver-scripting</projectUrl>
+    <iconUrl>https://raw.github.com/DbUp/DbUp/master/src/Information/dbup-icon.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>SQL Server object definition scripting for DbUp</description>
+    <releaseNotes>$notes$</releaseNotes>
+    <copyright>$copyright$</copyright>
+    <tags>dbup database migrations sqlserver scripting definitions scripts console</tags>
+    <dependencies>
+      <dependency id="dbup" version="3.2.1" />
+      <dependency id="Unofficial.Microsoft.SQLServer.SMO.2014" version="12.0.2000.8" />
+    </dependencies>
+  </metadata>
+</package>

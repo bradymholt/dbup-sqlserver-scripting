@@ -1,0 +1,14 @@
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\obj\Debug\DbUp.SqlServer.Scripting.csprojResolveAssemblyReference.cache
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\obj\Debug\DbUp.Scripting.dll
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\obj\Debug\DbUp.Scripting.pdb
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\bin\Debug\DbUp.Scripting.dll
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\bin\Debug\DbUp.Scripting.pdb
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\bin\Debug\DbUp.dll
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\bin\Debug\Microsoft.SqlServer.ConnectionInfo.dll
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\bin\Debug\Microsoft.SqlServer.ConnectionInfoExtended.dll
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\bin\Debug\Microsoft.SqlServer.Management.Sdk.Sfc.dll
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\bin\Debug\Microsoft.SqlServer.Smo.dll
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\bin\Debug\Microsoft.SqlServer.SmoExtended.dll
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\bin\Debug\Microsoft.SqlServer.SqlClrProvider.dll
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\bin\Debug\Microsoft.SqlServer.SqlEnum.dll
+C:\dev\dbup-sqlserver-scripting\DbUp.SqlServer.Scripting\bin\Debug\DbUp.xml
