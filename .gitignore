@@ -1,7 +1,8 @@
 *.nupkg
 nuget.exe
 *csproj.user
+*.suo
 bin/
 obj/
 packages/
-build/lib/*
+build/lib/net35/*
