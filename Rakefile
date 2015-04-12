@@ -17,6 +17,8 @@ task :package, [:version_number, :notes] do |t, args|
 	http.verify_mode = OpenSSL::SSL::VERIFY_NONE # read into this
 	data = http.get(uri.request_uri)
 	open("nuget.exe", "wb") { |file| file.write(data.body) }
+	desc "copy lib"
+	sh "xcopy /Y DbUp.Support.SqlServer.Scripting\\bin\\Release\\DbUp.Support.SqlServer.Scripting* build\\lib\\net35\\"
 	desc "create the nuget package"
 	sh "nuget.exe pack build\\#{project_id}.nuspec -Properties \"id=#{project_id};version=#{args.version_number};notes=v#{args.version_number} - #{args.notes};copyright=#{project_copyright}\""
 end
