@@ -34,7 +34,5 @@ class Program
         Console.WriteLine("Success!");
         Console.ResetColor();
         return 0;
-
-        
     }
 }
