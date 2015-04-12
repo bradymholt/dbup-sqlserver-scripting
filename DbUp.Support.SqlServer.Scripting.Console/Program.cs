@@ -10,9 +10,7 @@ class Program
 {
     static int Main(string[] args)
     {
-        var connectionString =
-    args.FirstOrDefault()
-    ?? "Server=(local)\\SqlExpress; Database=MyApp; Trusted_connection=true";
+        var connectionString = "Server=(localdb)\\v11.0;Integrated Security=true;AttachDbFileName=C:\\Users\\bholt\\DbUpTest.mdf;";
 
         var engine =
             DeployChanges.To
@@ -36,5 +34,7 @@ class Program
         Console.WriteLine("Success!");
         Console.ResetColor();
         return 0;
+
+        
     }
 }

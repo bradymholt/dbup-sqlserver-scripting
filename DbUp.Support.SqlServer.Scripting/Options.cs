@@ -11,7 +11,9 @@ namespace DbUp.Support.SqlServer.Scripting
     {
         public Options()
         {
-            this.BaseFolderNameDefinitions = "Definitions";
+            //relative to execution path; by default, place definitions in project directory which
+            //is two directories up from runtime (i.e. if execution path is bin\Debug, then project directory is ..\..\
+            this.BaseFolderNameDefinitions = "..\\..\\Definitions";
             this.FolderNameTables = "Tables";
             this.FolderNameViews = "Views";
             this.FolderNameProcedures = "Procedures";

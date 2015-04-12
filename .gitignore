@@ -1,2 +1,7 @@
 *.nupkg
 nuget.exe
+*csproj.user
+bin/
+obj/
+packages/
+build/lib/*

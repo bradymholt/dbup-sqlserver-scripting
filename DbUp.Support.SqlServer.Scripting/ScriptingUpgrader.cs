@@ -38,6 +38,7 @@ namespace DbUp
             {
                 if (m_configuration == null)
                 {
+                    //configuration field on UpgradeEngine is private so we need to use reflection to break in
                     var field = typeof(UpgradeEngine).GetField("configuration", BindingFlags.NonPublic | BindingFlags.Instance);
                     m_configuration = (UpgradeConfiguration)field.GetValue(m_engine);
                 }
@@ -70,6 +71,7 @@ namespace DbUp
                     var connectionManager = this.UpgradeConfiguration.ConnectionManager;
                     if (connectionManager is SqlConnectionManager)
                     {
+                        //connectionString field is private on SqlConnectionManager so we need to use reflection to break in
                         var field = typeof(SqlConnectionManager).GetField("connectionString", BindingFlags.NonPublic | BindingFlags.Instance);
                         m_connectionString = (string)field.GetValue((SqlConnectionManager)connectionManager);
                     }

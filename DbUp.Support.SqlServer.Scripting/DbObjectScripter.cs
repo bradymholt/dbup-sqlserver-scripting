@@ -30,11 +30,6 @@ namespace DbUp.Support.SqlServer.Scripting
             m_options = options;
             m_log = log;
 
-            if (string.IsNullOrEmpty(m_connectionBuilder.InitialCatalog))
-            {
-                throw new InvalidArgumentException("connectionString must include 'Initial Catalog' or 'DATABASE' value!");
-            }
-
             var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             m_definitionDirectory = Path.GetFullPath(Path.Combine(exePath, m_options.BaseFolderNameDefinitions)).Normalize();
             EnsureDirectoryExists(m_definitionDirectory);
@@ -383,7 +378,7 @@ namespace DbUp.Support.SqlServer.Scripting
             SqlConnection connection = new SqlConnection(m_connectionBuilder.ConnectionString);
             ServerConnection serverConnection = new ServerConnection(connection);
             context.Server = new Server(serverConnection);
-            context.Database = context.Server.Databases[m_connectionBuilder.InitialCatalog];
+            context.Database = context.Server.Databases[this.DatabaseName];
 
             context.Server.SetDefaultInitFields(loadAllFields);
 
@@ -447,6 +442,33 @@ namespace DbUp.Support.SqlServer.Scripting
             if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
+            }
+        }
+
+        private string m_databaseName;
+        protected string DatabaseName
+        {
+            get
+            {
+                if (m_databaseName == null)
+                {
+                    if (!string.IsNullOrEmpty(m_connectionBuilder.InitialCatalog))
+                    {
+                        m_databaseName = m_connectionBuilder.InitialCatalog;
+                    }
+                    else if (!string.IsNullOrEmpty(m_connectionBuilder.AttachDBFilename))
+                    {
+                        var fileInfo = new FileInfo(m_connectionBuilder.AttachDBFilename);
+                        m_databaseName = Path.GetFileNameWithoutExtension(fileInfo.Name);
+                    }
+
+                    if (string.IsNullOrEmpty(m_databaseName))
+                    {
+                        throw new InvalidArgumentException("connectionString must include 'Initial Catalog', 'Database', or 'AttachDBFilename' value!");
+                    }
+                }
+
+                return m_databaseName;
             }
         }
     }

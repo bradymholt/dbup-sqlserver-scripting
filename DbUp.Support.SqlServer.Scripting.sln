@@ -12,6 +12,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build\dbup-sqlserver-scripting.nuspec = build\dbup-sqlserver-scripting.nuspec
 		build\tools\dbup-sqlserver-scripting.psm1 = build\tools\dbup-sqlserver-scripting.psm1
 		Rakefile = Rakefile
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{41BE4E96-7316-4D8C-9CEB-FD5EF11C37A4}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
 Global
