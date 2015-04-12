@@ -21,6 +21,8 @@ For example:
                 .LogToConsole()
                 .Build();
 
+        //var result = upgrader.PerformUpgrade(); //Don't do this!  Do the following instead.
+
         ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(engine);
         var result = upgradeScriptingEngine.PerformUpgrade(args);
 
@@ -48,6 +50,8 @@ This package depends on [dbup-consolescripts](https://github.com/bradyholt/dbup-
 By default, the definitions are saved in the \Definitions folder in the root of your project.  **The definitions will not be *included* in the Visual Studio Project so to see them from within Visual Studio you will need to use the *Show All Files* (refresh) option in Solution Explorer**.
 
 If the migration issues a CREATE statement and the definition is not already saved, it will be created.  If a DROP is being performed, the definition file will be *deleted*.  Otherwise, an existing definition file will simply be updated with the latest object definition.
+
+Scripting of definitions will only be performed when running `Start-Migrations` from the Package Manager Console and not when running your DbUp project directly.  `Start-Migrations` passes in `--fromconsole` which triggers scripting.  This is important because when running your DbUp project during a deployment to another environment (or integrated into Octopus Deploy for instance) you do not want object definition scripting to run but only the migrations.
 
 ## Object Types
 The following SQL Server object types are currently supported:
