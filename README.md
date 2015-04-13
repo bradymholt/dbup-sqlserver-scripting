@@ -7,7 +7,7 @@ SQL Server object definition scripting for [DbUp](http://dbup.github.io/).  Exte
 ## Setup
 
 1. You must use the SqlDatabase upgrade engine in DbUp (i.e. `DeployChanges.To.SqlDatabase(connectionString)`) for definition scripting to work.
-2. Rather than calling `.PerformUpgrade` on the UpgradeEngine, you need to instantiate a ScriptingUpgrader object and call `PerformUpgrade` on it instead.
+2. Rather than calling `.PerformUpgrade` on the UpgradeEngine, you need to instantiate a ScriptingUpgrader object and call `Run` on it instead.
 
 For example:
 
@@ -24,7 +24,7 @@ For example:
         //var result = upgrader.PerformUpgrade(); //Don't do this!  Do the following instead.
 
         ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(upgrader);
-        var result = upgradeScriptingEngine.PerformUpgrade(args);
+        var result = upgradeScriptingEngine.Run(args);
 
         if (!result.Successful)
         {
