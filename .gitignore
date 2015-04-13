@@ -5,4 +5,5 @@ nuget.exe
 bin/
 obj/
 packages/
+Definitions/
 build/lib/net35/*

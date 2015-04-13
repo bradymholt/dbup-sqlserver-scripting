@@ -93,10 +93,10 @@ namespace DbUp
             var scripter = new DbObjectScripter(this.ConnectionString, m_options, this.Log);
             scripter.ScriptAll();
 
-            return new DatabaseUpgradeResult(null, true, null);
+            return new DatabaseUpgradeResult(new List<SqlScript>(), true, null);
         }
 
-        public DatabaseUpgradeResult PerformUpgrade(string[] args)
+        public DatabaseUpgradeResult Run(string[] args)
         {
             DatabaseUpgradeResult result = null;
             if (args.Any(a => "--scriptAllDefinitions".Equals(a, StringComparison.InvariantCultureIgnoreCase)))

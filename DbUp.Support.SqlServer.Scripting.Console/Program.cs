@@ -20,7 +20,7 @@ class Program
                 .Build();
 
         ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(engine);
-        var result = upgradeScriptingEngine.PerformUpgrade(args);
+        var result = upgradeScriptingEngine.Run(args);
 
         if (!result.Successful)
         {
