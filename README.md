@@ -3,7 +3,7 @@ SQL Server object definition scripting for [DbUp](http://dbup.github.io/).  Exte
 
 ## Demo
 
-[![Demo Video](http://img.youtube.com/vi/2uMsVl_Zk6Y/0.jpg)](https://www.youtube.com/watch?v=2uMsVl_Zk6Y)
+[![Demo Video](https://raw.githubusercontent.com/bradyholt/dbup-sqlserver-scripting/master/assets/demo-thumbnail.png)](https://www.youtube.com/watch?v=2uMsVl_Zk6Y)
 
 ## Install
     Install-Package dbup-sqlserver-scripting
