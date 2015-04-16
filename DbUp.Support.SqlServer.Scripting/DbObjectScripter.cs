@@ -411,7 +411,7 @@ namespace DbUp.Support.SqlServer.Scripting
                     sb.Append(Environment.NewLine);
                 }
 
-                m_log.WriteInformation(string.Format("Saving definition for: {0}", scriptObject.FullName));
+                m_log.WriteInformation(string.Format("Saving object definition: {0}", Path.Combine(outputDirectory, scriptObject.FileName)));
                 File.WriteAllText(Path.Combine(outputDirectory, scriptObject.FileName), sb.ToString());
             }
             catch (Exception ex)
@@ -427,7 +427,7 @@ namespace DbUp.Support.SqlServer.Scripting
                 string filePath = Path.Combine(outputDirectory, scriptObject.FileName);
                 if (File.Exists(filePath))
                 {
-                    m_log.WriteInformation(string.Format("Deleting definition for: {0}", scriptObject.FullName));
+                    m_log.WriteInformation(string.Format("Deleting object definition: {0}", filePath));
                     File.Delete(filePath);
                 }
             }
