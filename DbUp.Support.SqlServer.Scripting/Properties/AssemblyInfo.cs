@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DbProphet")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("DbUp.Support.SqlServer.Scripting")]
+[assembly: AssemblyDescription("Extends DbUp to provide SQL Server object definition scripting when running migrations from Visual Studio.  When a database object changes during a migration, its definition will be saved in the project.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("DbProphet")]
+[assembly: AssemblyCompany("Brady Holt")]
+[assembly: AssemblyProduct("dbup-sqlserver-scripting")]
 [assembly: AssemblyCopyright("Copyright © Microsoft 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
