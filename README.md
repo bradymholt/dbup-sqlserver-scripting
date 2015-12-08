@@ -51,7 +51,7 @@ This package depends on [dbup-consolescripts](https://github.com/bradyholt/dbup-
 
 1. Run `New-Migration` from the Package Manager Console
 2. Edit the newly created .sql file in the \Migrations folder.
-3. Run `Start-Migrations` to migrate the database.  Notice in the output, your changed object definitions have been saved/updated.
+3. Run `Start-Migrations` to migrate the database.  Notice in the output; your changed object definitions have been saved/updated.
 
 By default, the definitions are saved in the \Definitions folder in the root of your project.  **The definitions will not be *included* in the Visual Studio Project so to see them from within Visual Studio you will need to use the *Show All Files* (refresh) option in Solution Explorer**.
 
