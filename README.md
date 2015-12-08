@@ -1,5 +1,5 @@
 # DbUp SQL Server Object Scripting
-SQL Server object definition scripting for [DbUp](http://dbup.github.io/).  Extends DbUp to provide SQL Server object definition scripting when running migrations from Visual Studio Package Manager Console.  When a database object changes during a migration, its latest definition will be saved in the project.  This allows you to have all of your database object definitions versioned in your repository and to easily compare the before/after diff of a definition changed by a migration (great for pull request / code reviews!).   
+SQL Server object definition scripting for [DbUp](http://dbup.github.io/).  This package extends DbUp to provide SQL Server object definition scripting when running migrations from Visual Studio Package Manager Console.  When a database object changes during a migration, its latest definition will be saved in the project.  This allows you to have all of your database object definitions versioned in your repository and to easily compare the before/after diff of a definition changed by a migration (great for pull request / code reviews!).   
 
 ## Demo
 
