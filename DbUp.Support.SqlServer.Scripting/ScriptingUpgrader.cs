@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data;
 
 namespace DbUp
 {
@@ -20,14 +21,15 @@ namespace DbUp
         UpgradeEngine m_engine;
         Options m_options;
 
-        public ScriptingUpgrader(UpgradeEngine engine, Options options)
+        public ScriptingUpgrader(string connectionString, UpgradeEngine engine, Options options)
         {
             m_engine = engine;
             m_options = options;
+            m_connectionString = connectionString;
         }
 
-        public ScriptingUpgrader(UpgradeEngine engine)
-            : this(engine, new Options())
+        public ScriptingUpgrader(string connectionString, UpgradeEngine engine)
+            : this(connectionString, engine, new Options())
         {
         }
 
@@ -61,22 +63,23 @@ namespace DbUp
             }
         }
 
-        string m_connectionString;
+        readonly string m_connectionString;
         string ConnectionString
         {
             get
             {
-                if (m_connectionString == null)
-                {
-                    var connectionManager = this.UpgradeConfiguration.ConnectionManager;
-                    if (connectionManager is SqlConnectionManager)
-                    {
-                        //connectionString field is private on SqlConnectionManager so we need to use reflection to break in
-                        var field = typeof(SqlConnectionManager).GetField("connectionString", BindingFlags.NonPublic | BindingFlags.Instance);
-                        m_connectionString = (string)field.GetValue((SqlConnectionManager)connectionManager);
-                    }
-                }
-
+                /* if (m_connectionString == null)
+                 { 
+                     var connectionManager = this.UpgradeConfiguration.ConnectionManager;
+                     if (connectionManager is SqlConnectionManager)
+                     {
+                         // this does not work in dbup 3.2.4
+                         //connectionString field is private on SqlConnectionManager so we need to use reflection to break in
+                         var field = typeof(SqlConnectionManager).GetField("connectionString", BindingFlags.NonPublic | BindingFlags.Instance);
+                         m_connectionString = (string)field.GetValue((SqlConnectionManager)connectionManager);
+                     }
+                 }
+                 */
                 return m_connectionString;
             }
         }
@@ -99,7 +102,7 @@ namespace DbUp
         public DatabaseUpgradeResult Run(string[] args)
         {
             DatabaseUpgradeResult result = null;
-            if (args.Any(a => "--scriptAllDefinitions".Equals(a, StringComparison.InvariantCultureIgnoreCase)))
+            if (args.Any(a => "--scriptAllDefinitions".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
             {
                 result = ScriptAll();
             }
@@ -107,7 +110,7 @@ namespace DbUp
             {
                 var scriptsToExecute = m_engine.GetScriptsToExecute();
 
-                if (args.Any(a => "--whatIf".Equals(a, StringComparison.InvariantCultureIgnoreCase)))
+                if (args.Any(a => "--whatIf".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
                 {
                     result = new DatabaseUpgradeResult(null, true, null);
 
@@ -120,7 +123,7 @@ namespace DbUp
                     result = m_engine.PerformUpgrade();
 
                     if (result.Successful
-                        && args.Any(a => "--fromconsole".Equals(a, StringComparison.InvariantCultureIgnoreCase)))
+                        && args.Any(a => "--fromconsole".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
                     {
                         this.Log.WriteInformation("Scripting changed database objects...");
                         var scripter = new DbObjectScripter(this.ConnectionString, m_options, this.Log);
