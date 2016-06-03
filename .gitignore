@@ -1,5 +1,4 @@
 *.nupkg
-nuget.exe
 *csproj.user
 *.suo
 bin/
