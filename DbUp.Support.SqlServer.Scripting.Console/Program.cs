@@ -19,7 +19,7 @@ class Program
                 .LogToConsole()
                 .Build();
 
-        ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(engine);
+        ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(connectionString, engine);
         var result = upgradeScriptingEngine.Run(args);
 
         if (!result.Successful)
