@@ -9,7 +9,7 @@ require 'openssl'
 project_name = "DbUp.Support.SqlServer.Scripting"
 project_copyright = "Copyright #{DateTime.now.strftime('%Y')}"
 
-version_info = File.read('version.txt').split(':')
+version_info = open("version.txt").gets.split(':')
 version_number = version_info[0]
 version_notes = version_info[1]
 
@@ -20,9 +20,9 @@ task :restore do |t|
   end
 end
 
-task :build => [:version] do |t|
+task :build do |t|
   build :build => [:restore] do |b|
-    b.sln = 'DbUp.Support.SqlServer.Scripting.sln'
+    b.sln = '..\\DbUp.Support.SqlServer.Scripting.sln'
     b.target = ['Clean', 'Rebuild'] 
     b.prop 'Configuration', 'Release'
   end
@@ -30,7 +30,7 @@ end
 
 task :package => [:build] do |t, args|
 	desc "copy lib"
-  sh "xcopy /Y /S /EXCLUDE:exclude.txt ..\\#{project_name}\\bin\\Release\\net35 .\\pack\\lib\\net35\\"
+  sh "xcopy /Y /S /EXCLUDE:exclude.txt ..\\#{project_name}\\bin\\Release\\#{project_name}* .\\pack\\lib\\net35\\"
 	desc "create the nuget package"
   sh "nuget.exe pack .\\pack\\#{project_name}.nuspec -Properties \"version=#{version_number};notes=v#{version_number} - #{version_notes};copyright=#{project_copyright}\""
 end
