@@ -29,7 +29,7 @@ For example:
 
         //var result = upgrader.PerformUpgrade(); //Don't do this!  Do the following instead.
 
-        <strong>ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(upgrader);</strong>
+        <strong>ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(connectionString, upgrader);</strong>
         <strong>var result = upgradeScriptingEngine.Run(args);</strong>
 
         if (!result.Successful)

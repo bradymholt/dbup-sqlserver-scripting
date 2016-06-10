@@ -8,3 +8,4 @@ packages/
 Definitions/
 build/pack/lib
 build/*.nupkg
+.vs/
