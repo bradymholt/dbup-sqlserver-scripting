@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <id>$id$</id>
+    <id>dbup-sqlserver-scripting</id>
     <version>$version$</version>
     <title>DbUp SQL Server Object Scripting</title>
     <authors>Brady Holt</authors>

@@ -1,0 +1,50 @@
+#DbUp.ConsoleScripts
+#Example usage: rake release[1.2.0,"Release notes here..."]
+
+require 'albacore'
+require 'date'
+require 'net/http'
+require 'openssl'
+
+project_id = "dbup-sqlserver-scripting"
+project_name = "DbUp.Support.SqlServer.Scripting"
+project_copyright = "Copyright #{DateTime.now.strftime('%Y')}"
+
+version_info = open("version.txt").gets.split(':')
+version_number = version_info[0]
+version_notes = version_info[1]
+
+task :restore do |t|
+  nugets_restore :restore do |p|
+    p.out = 'packages'
+    p.exe = 'tools/NuGet.exe'
+  end
+end
+
+task :build do |t|
+  build :build => [:restore] do |b|
+    b.sln = '..\\DbUp.Support.SqlServer.Scripting.sln'
+    b.target = ['Clean', 'Rebuild'] 
+    b.prop 'Configuration', 'Release'
+  end
+end
+
+task :package => [:build] do |t, args|
+	desc "copy lib"
+  sh "xcopy /Y /S /EXCLUDE:exclude.txt ..\\#{project_name}\\bin\\Release\\#{project_name}* .\\pack\\lib\\net35\\"
+	desc "create the nuget package"
+  sh "nuget.exe pack .\\pack\\#{project_id}.nuspec -Properties \"version=#{version_number};notes=v#{version_number} - #{version_notes};copyright=#{project_copyright}\""
+end
+
+task :push do |t, args|
+	sh "nuget.exe push #{project_id}.#{version_number}.nupkg"
+end
+
+task :tag do
+	sh "git tag -a v#{version_number} -m \"#{version_notes}\""
+	sh "git push --tags"
+end
+
+task :release => [:package, :push, :tag] do |t, args|
+	puts "v#{@version} Released!"
+end

@@ -1,9 +1,11 @@
+.DS_Store
 *.nupkg
-nuget.exe
 *csproj.user
 *.suo
 bin/
 obj/
 packages/
 Definitions/
-build/lib/net35/*
+build/pack/lib
+build/*.nupkg
+.vs/

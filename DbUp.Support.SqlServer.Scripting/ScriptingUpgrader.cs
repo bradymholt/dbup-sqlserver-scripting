@@ -90,7 +90,7 @@ namespace DbUp
 
             if (this.ConnectionString == null)
             {
-                return new DatabaseUpgradeResult(null, false, new Exception("connectionString could not be determined"));
+                return new DatabaseUpgradeResult(Enumerable.Empty<SqlScript>(), false, new Exception("connectionString could not be determined"));
             }
 
             var scripter = new DbObjectScripter(this.ConnectionString, m_options, this.Log);
@@ -112,7 +112,7 @@ namespace DbUp
 
                 if (args.Any(a => "--whatIf".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    result = new DatabaseUpgradeResult(null, true, null);
+                    result = new DatabaseUpgradeResult(Enumerable.Empty<SqlScript>(), true, null);
 
                     this.Log.WriteWarning("WHATIF Mode!");
                     this.Log.WriteWarning("The following scripts would have been executed:");
