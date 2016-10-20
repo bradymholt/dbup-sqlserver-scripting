@@ -13,6 +13,7 @@ namespace DbUp.Support.SqlServer.Scripting
         View = 2,
         Procedure = 4,
         Function = 8,
-        Synonym = 16
+        Synonym = 16,
+        Type = 32
     }
 }
