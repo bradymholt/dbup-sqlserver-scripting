@@ -22,10 +22,10 @@ task :restore do |t|
 end
 
 task :build do |t|
-  build :build => [:restore] do |b|
-    b.sln = '..\\DbUp.Support.SqlServer.Scripting.sln'
-    b.target = ['Clean', 'Rebuild'] 
-    b.prop 'Configuration', 'Release'
+  msbuild :build => [:restore] do |b|
+    b.solution = '..\\DbUp.Support.SqlServer.Scripting.sln'
+    b.targets = [ :Rebuild ] 
+    b.properties = { :Configuration => 'Release' }
   end
 end
 

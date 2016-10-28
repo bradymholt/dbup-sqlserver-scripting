@@ -1,3 +1,4 @@
+1.2:Added support for User Defined Types
 1.1:Support for DbUp 3.3.4, misc bug fixes
 1.0.4:Use dbup-consolescripts 1.0.9 and fix error with spaces in path
 1.0.3:Showing entire path of scripted definiton file
