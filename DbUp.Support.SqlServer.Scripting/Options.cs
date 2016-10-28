@@ -18,13 +18,15 @@ namespace DbUp.Support.SqlServer.Scripting
             this.FolderNameViews = "Views";
             this.FolderNameProcedures = "Procedures";
             this.FolderNameFunctions = "Functions";
+            this.FolderNameUserDefinedTypes = "UserDefinedTypes";
             this.FolderNameSynonyms = "Synonyms";
 
             this.ObjectsToInclude = ObjectTypeEnum.Function
                 | ObjectTypeEnum.Procedure
                 | ObjectTypeEnum.Synonym
                 | ObjectTypeEnum.Table
-                | ObjectTypeEnum.View;
+                | ObjectTypeEnum.View
+                | ObjectTypeEnum.Type;
 
             this.ScriptingOptions = new ScriptingOptions()
           {
@@ -39,6 +41,7 @@ namespace DbUp.Support.SqlServer.Scripting
         public string BaseFolderNameDefinitions { get; set; }
         public string FolderNameTables { get; set; }
         public string FolderNameViews { get; set; }
+        public string FolderNameUserDefinedTypes { get; set; }
         public string FolderNameProcedures { get; set; }
         public string FolderNameFunctions { get; set; }
         public string FolderNameSynonyms { get; set; }
