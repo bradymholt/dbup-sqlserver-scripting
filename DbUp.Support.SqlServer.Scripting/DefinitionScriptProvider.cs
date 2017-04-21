@@ -19,7 +19,8 @@ namespace DbUp.Support.SqlServer.Scripting
     {
         private readonly string _defintionFolderPath;
         private readonly Regex _contentReplaceRegex;
-        public DefinitionScriptProvider(string defintionFolderPath = "..\\..\\Definitions", string contentReplaceRegex = "(SET ANSI_NULLS ON)|(SET QUOTED_IDENTIFIER ON)")
+        public DefinitionScriptProvider(string defintionFolderPath = "..\\..\\Definitions", 
+            string contentReplaceRegex = "(SET ANSI_NULLS ON)|(SET ANSI_NULLS OFF)|(SET QUOTED_IDENTIFIER OFF)|(SET QUOTED_IDENTIFIER ON)")
         {
             if (Directory.Exists(defintionFolderPath))
             {
