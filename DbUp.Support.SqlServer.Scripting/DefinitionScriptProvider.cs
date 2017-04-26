@@ -9,7 +9,6 @@ using DbUp.Engine.Transactions;
 
 namespace DbUp.Support.SqlServer.Scripting
 {
-
     /// <summary>
     /// This script provider will collect all the scripts in the generated Definitions folder and attempt to order
     /// them in order of dependency, the dependency searching is quite basic, as it only looks for
@@ -19,6 +18,12 @@ namespace DbUp.Support.SqlServer.Scripting
     {
         private readonly string _defintionFolderPath;
         private readonly Regex _contentReplaceRegex;
+
+        public DefinitionScriptProvider(): this("..\\..\\Definitions", "(SET ANSI_NULLS ON)|(SET ANSI_NULLS OFF)|(SET QUOTED_IDENTIFIER OFF)|(SET QUOTED_IDENTIFIER ON)")
+        {
+            
+        }
+
         public DefinitionScriptProvider(string defintionFolderPath = "..\\..\\Definitions", 
             string contentReplaceRegex = "(SET ANSI_NULLS ON)|(SET ANSI_NULLS OFF)|(SET QUOTED_IDENTIFIER OFF)|(SET QUOTED_IDENTIFIER ON)")
         {
@@ -46,6 +51,12 @@ namespace DbUp.Support.SqlServer.Scripting
         public IEnumerable<SqlScript> GetScripts(IConnectionManager connectionManager)
         {
             return GatherScriptsWithDependencies();
+        }
+
+        public string GetScriptContent()
+        {
+            var scripts = GatherScriptsWithDependencies();
+            return string.Join($"{Environment.NewLine} GO {Environment.NewLine}", scripts.Select(x => x.Contents));
         }
 
         private string GetFileContent(string path)
