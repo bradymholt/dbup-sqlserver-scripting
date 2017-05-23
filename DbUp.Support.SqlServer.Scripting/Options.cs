@@ -33,7 +33,8 @@ namespace DbUp.Support.SqlServer.Scripting
               Default = true,
               ClusteredIndexes = true,
               NonClusteredIndexes = true,
-              DriAll = true
+              DriAll = true,
+              Triggers = true
           };
         }
 
