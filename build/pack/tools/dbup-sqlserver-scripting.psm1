@@ -43,7 +43,7 @@ function New-InitialScript {
   }
   #Create the new script by calling the lib
   $initialScriptPath = "$projectDirectory\Scripts\001-initial.sql"
-  Receive-Job $job | New-Item $initialScriptPath -Force -ErrorAction Ignore
+  Receive-Job $job | New-Item $initialScriptPath -Force -ErrorAction Ignore -ItemType file
   
   #add to project
   $addedItem = $project.ProjectItems.Item("Scripts").ProjectItems.AddFromFileCopy($initialScriptPath)
