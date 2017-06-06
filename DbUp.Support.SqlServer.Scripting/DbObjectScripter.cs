@@ -62,12 +62,6 @@ namespace DbUp.Support.SqlServer.Scripting
                     ScriptAllStoredProcedures(context);
                 });
 
-                var functionsScriptTask = Task.Run(() =>
-                {
-                    var context = GetDatabaseContext(true);
-                    ScriptAllFunctions(context);
-                });
-
                 var synonymsScriptTask = Task.Run(() =>
                 {
                     var context = GetDatabaseContext(true);
@@ -84,10 +78,9 @@ namespace DbUp.Support.SqlServer.Scripting
                     tablesScriptTask,
                     viewsScriptTask,
                     storedProceduresScriptTask,
-                    functionsScriptTask,
-					synonymsScriptTask,
-					udtScriptTask
-				);
+                    synonymsScriptTask,
+                    udtScriptTask
+                );
             }
             catch (Exception ex)
             {
