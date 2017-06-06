@@ -11,8 +11,7 @@
 
 # Build
 
-- cd `/build`
-- Run `rake build`
+- Build using Visual Studio using the "Release" configueation
 
 # Release to NuGet
 
