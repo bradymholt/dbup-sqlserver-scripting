@@ -11,7 +11,7 @@
 
 # Build
 
-- Build using Visual Studio using the "Release" configueation
+- Build using Visual Studio using the "Release" configuration
 
 # Release to NuGet
 
