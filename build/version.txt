@@ -1,4 +1,4 @@
-1.4:Prevent functions from being scripted twice
+1.5:Prevent functions from being scripted twice
 1.3:New support for building database from scratch using new DefinitionScriptProvider
 1.2:Added support for User Defined Types
 1.1:Support for DbUp 3.3.4, misc bug fixes
