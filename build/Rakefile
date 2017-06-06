@@ -29,7 +29,7 @@ task :build do |t|
   end
 end
 
-task :package => [:build] do |t, args|
+task :package do |t, args|
 	desc "copy lib"
   sh "xcopy /Y /S /EXCLUDE:exclude.txt ..\\#{project_name}\\bin\\Release\\#{project_name}* .\\pack\\lib\\net35\\"
 	desc "create the nuget package"

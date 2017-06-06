@@ -42,7 +42,7 @@ namespace DbUp.Support.SqlServer.Scripting
 
             if (_defintionFolderPath == null)
             {
-                throw new DirectoryNotFoundException($"Path: {defintionFolderPath} not found");
+                throw new DirectoryNotFoundException("Path: " + defintionFolderPath + " not found");
             }
 
             _contentReplaceRegex = new Regex(contentReplaceRegex, RegexOptions.Multiline);
