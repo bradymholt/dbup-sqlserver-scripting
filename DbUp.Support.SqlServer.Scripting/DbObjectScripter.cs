@@ -24,6 +24,8 @@ namespace DbUp.Support.SqlServer.Scripting
         private SqlConnectionStringBuilder m_connectionBuilder;
         private IUpgradeLog m_log;
 
+        private List<string> IncludeTables;
+
         public DbObjectScripter(string connectionString, Options options, IUpgradeLog log)
         {
             m_connectionBuilder = new SqlConnectionStringBuilder(connectionString);
@@ -33,7 +35,28 @@ namespace DbUp.Support.SqlServer.Scripting
             var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             m_definitionDirectory = Path.GetFullPath(Path.Combine(exePath, m_options.BaseFolderNameDefinitions)).Normalize();
             EnsureDirectoryExists(m_definitionDirectory);
+
+            //Find filters... 
+            IncludeTables = ReadFilterFile($"{m_definitionDirectory}{m_options.FolderNameTables}/include.txt");
+
         }
+
+
+        private List<string> ReadFilterFile(string path)
+        {
+            var ret = new List<string>();
+            if (System.IO.File.Exists(path))
+            {
+                var s = File.OpenText(path);
+                while (!s.EndOfStream)
+                {
+                    ret.Add(s.ReadLine());
+                }
+            }
+            return ret;
+        }
+
+
 
         public ScripterResult ScriptAll()
         {
@@ -167,11 +190,14 @@ namespace DbUp.Support.SqlServer.Scripting
                 {
                     if (!table.IsSystemObject)
                     {
-                        tables.Add(new ScriptObject(ObjectTypeEnum.Table, ObjectActionEnum.Create)
+                        if (IncludeTables.Count == 0 || IncludeTables.Contains(table.Name))
                         {
-                            ObjectName = table.Name,
-                            ObjectSchema = table.Schema
-                        });
+                            tables.Add(new ScriptObject(ObjectTypeEnum.Table, ObjectActionEnum.Create)
+                            {
+                                ObjectName = table.Name,
+                                ObjectSchema = table.Schema
+                            });
+                        }
                     }
                 }
 
@@ -204,78 +230,103 @@ namespace DbUp.Support.SqlServer.Scripting
             }
         }
 
-		protected void ScriptAllUserDefinedTypes(DbServerContext context) {
-			if ((m_options.ObjectsToInclude & ObjectTypeEnum.Type) == ObjectTypeEnum.Type) {
-				List<ScriptObject> types = new List<ScriptObject>();
-				foreach (UserDefinedType udt in context.Database.UserDefinedTypes) {
-					types.Add(new ScriptObject(ObjectTypeEnum.Type, ObjectActionEnum.Create) {
-						ObjectName = udt.Name,
-						ObjectSchema = udt.Schema
-					});
-				}
-				foreach (UserDefinedDataType udt in context.Database.UserDefinedDataTypes) {
-					types.Add(new ScriptObject(ObjectTypeEnum.Type, ObjectActionEnum.Create) {
-						ObjectName = udt.Name,
-						ObjectSchema = udt.Schema
-					});
-				}
-				foreach (UserDefinedFunction udt in context.Database.UserDefinedFunctions) {
-					if (!udt.IsSystemObject) {
-						types.Add(new ScriptObject(ObjectTypeEnum.Type, ObjectActionEnum.Create) {
-							ObjectName = udt.Name,
-							ObjectSchema = udt.Schema
-						});
-					}
-				}
-				foreach (UserDefinedTableType udt in context.Database.UserDefinedTableTypes) {
-					if (udt.IsUserDefined) {
-						types.Add(new ScriptObject(ObjectTypeEnum.Type, ObjectActionEnum.Create) {
-							ObjectName = udt.Name,
-							ObjectSchema = udt.Schema
-						});
-					}
-				}
+        protected void ScriptAllUserDefinedTypes(DbServerContext context)
+        {
+            if ((m_options.ObjectsToInclude & ObjectTypeEnum.Type) == ObjectTypeEnum.Type)
+            {
+                List<ScriptObject> types = new List<ScriptObject>();
+                foreach (UserDefinedType udt in context.Database.UserDefinedTypes)
+                {
+                    types.Add(new ScriptObject(ObjectTypeEnum.Type, ObjectActionEnum.Create)
+                    {
+                        ObjectName = udt.Name,
+                        ObjectSchema = udt.Schema
+                    });
+                }
+                foreach (UserDefinedDataType udt in context.Database.UserDefinedDataTypes)
+                {
+                    types.Add(new ScriptObject(ObjectTypeEnum.Type, ObjectActionEnum.Create)
+                    {
+                        ObjectName = udt.Name,
+                        ObjectSchema = udt.Schema
+                    });
+                }
+                foreach (UserDefinedFunction udt in context.Database.UserDefinedFunctions)
+                {
+                    if (!udt.IsSystemObject)
+                    {
+                        types.Add(new ScriptObject(ObjectTypeEnum.Type, ObjectActionEnum.Create)
+                        {
+                            ObjectName = udt.Name,
+                            ObjectSchema = udt.Schema
+                        });
+                    }
+                }
+                foreach (UserDefinedTableType udt in context.Database.UserDefinedTableTypes)
+                {
+                    if (udt.IsUserDefined)
+                    {
+                        types.Add(new ScriptObject(ObjectTypeEnum.Type, ObjectActionEnum.Create)
+                        {
+                            ObjectName = udt.Name,
+                            ObjectSchema = udt.Schema
+                        });
+                    }
+                }
 
-				ScriptUserDefinedTypes(context, types);
-			}
-		}
+                ScriptUserDefinedTypes(context, types);
+            }
+        }
 
-		protected void ScriptUserDefinedTypes(DbServerContext context, IEnumerable<ScriptObject> udts) {
-			if ((m_options.ObjectsToInclude & ObjectTypeEnum.Type) == ObjectTypeEnum.Type) {
-				string outputDirectory = Path.Combine(m_definitionDirectory, m_options.FolderNameUserDefinedTypes);
+        protected void ScriptUserDefinedTypes(DbServerContext context, IEnumerable<ScriptObject> udts)
+        {
+            if ((m_options.ObjectsToInclude & ObjectTypeEnum.Type) == ObjectTypeEnum.Type)
+            {
+                string outputDirectory = Path.Combine(m_definitionDirectory, m_options.FolderNameUserDefinedTypes);
 
-				foreach (ScriptObject udtObject in udts) {
-					if (udtObject.ObjectAction == ObjectActionEnum.Drop) {
-						DeleteScript(udtObject, outputDirectory);
-					} else {
-						if (context.Database.UserDefinedTypes.Contains(udtObject.ObjectName, udtObject.ObjectSchema)) {
-							var currentType = context.Database.UserDefinedTypes[udtObject.ObjectName, udtObject.ObjectSchema];
-							ScriptDefinition(udtObject, outputDirectory, new Func<StringCollection>(() => {
-								return currentType.Script(m_options.ScriptingOptions);
-							}));
-						} else if (context.Database.UserDefinedDataTypes.Contains(udtObject.ObjectName, udtObject.ObjectSchema)) {
-							var currentType = context.Database.UserDefinedDataTypes[udtObject.ObjectName, udtObject.ObjectSchema];
-							ScriptDefinition(udtObject, outputDirectory, new Func<StringCollection>(() => {
-								return currentType.Script(m_options.ScriptingOptions);
-							}));
-						} else if (context.Database.UserDefinedFunctions.Contains(udtObject.ObjectName, udtObject.ObjectSchema)) {
-							var currentType = context.Database.UserDefinedFunctions[udtObject.ObjectName, udtObject.ObjectSchema];
-							ScriptDefinition(udtObject, outputDirectory, new Func<StringCollection>(() => {
-								return currentType.Script(m_options.ScriptingOptions);
-							}));
-						} else {
-							var currentType = context.Database.UserDefinedTableTypes[udtObject.ObjectName, udtObject.ObjectSchema];
-							ScriptDefinition(udtObject, outputDirectory, new Func<StringCollection>(() => {
-								return currentType.Script(m_options.ScriptingOptions);
-							}));
+                foreach (ScriptObject udtObject in udts)
+                {
+                    if (udtObject.ObjectAction == ObjectActionEnum.Drop)
+                    {
+                        DeleteScript(udtObject, outputDirectory);
+                    }
+                    else
+                    {
+                        if (context.Database.UserDefinedTypes.Contains(udtObject.ObjectName, udtObject.ObjectSchema))
+                        {
+                            var currentType = context.Database.UserDefinedTypes[udtObject.ObjectName, udtObject.ObjectSchema];
+                            ScriptDefinition(udtObject, outputDirectory, new Func<StringCollection>(() => {
+                                return currentType.Script(m_options.ScriptingOptions);
+                            }));
+                        }
+                        else if (context.Database.UserDefinedDataTypes.Contains(udtObject.ObjectName, udtObject.ObjectSchema))
+                        {
+                            var currentType = context.Database.UserDefinedDataTypes[udtObject.ObjectName, udtObject.ObjectSchema];
+                            ScriptDefinition(udtObject, outputDirectory, new Func<StringCollection>(() => {
+                                return currentType.Script(m_options.ScriptingOptions);
+                            }));
+                        }
+                        else if (context.Database.UserDefinedFunctions.Contains(udtObject.ObjectName, udtObject.ObjectSchema))
+                        {
+                            var currentType = context.Database.UserDefinedFunctions[udtObject.ObjectName, udtObject.ObjectSchema];
+                            ScriptDefinition(udtObject, outputDirectory, new Func<StringCollection>(() => {
+                                return currentType.Script(m_options.ScriptingOptions);
+                            }));
+                        }
+                        else
+                        {
+                            var currentType = context.Database.UserDefinedTableTypes[udtObject.ObjectName, udtObject.ObjectSchema];
+                            ScriptDefinition(udtObject, outputDirectory, new Func<StringCollection>(() => {
+                                return currentType.Script(m_options.ScriptingOptions);
+                            }));
 
-						}
-					}
-				}
-			}
-		}
+                        }
+                    }
+                }
+            }
+        }
 
-		protected void ScriptAllViews(DbServerContext context)
+        protected void ScriptAllViews(DbServerContext context)
         {
             if ((m_options.ObjectsToInclude & ObjectTypeEnum.View) == ObjectTypeEnum.View)
             {
@@ -296,7 +347,7 @@ namespace DbUp.Support.SqlServer.Scripting
             }
         }
 
-		protected void ScriptViews(DbServerContext context, IEnumerable<ScriptObject> views)
+        protected void ScriptViews(DbServerContext context, IEnumerable<ScriptObject> views)
         {
             if ((m_options.ObjectsToInclude & ObjectTypeEnum.View) == ObjectTypeEnum.View)
             {
@@ -418,10 +469,10 @@ namespace DbUp.Support.SqlServer.Scripting
                 foreach (Synonym synonym in context.Database.Synonyms)
                 {
                     synonyms.Add(new ScriptObject(ObjectTypeEnum.Synonym, ObjectActionEnum.Create)
-                        {
-                            ObjectName = synonym.Name,
-                            ObjectSchema = synonym.Schema
-                        });
+                    {
+                        ObjectName = synonym.Name,
+                        ObjectSchema = synonym.Schema
+                    });
                 }
 
                 ScriptSynonyms(context, synonyms);
@@ -438,9 +489,9 @@ namespace DbUp.Support.SqlServer.Scripting
                 {
                     Synonym curentSynonym = context.Database.Synonyms[synonymObject.ObjectName, synonymObject.ObjectSchema];
                     ScriptDefinition(synonymObject, outputDirectory, new Func<StringCollection>(() =>
-                        {
-                            return curentSynonym.Script(m_options.ScriptingOptions);
-                        }));
+                    {
+                        return curentSynonym.Script(m_options.ScriptingOptions);
+                    }));
                 }
             }
         }
