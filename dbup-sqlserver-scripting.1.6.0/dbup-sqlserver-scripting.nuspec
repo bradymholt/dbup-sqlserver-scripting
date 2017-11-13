@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>dbup-sqlserver-scripting</id>
+    <version>1.6.0</version>
+    <title>DbUp SQL Server Object Scripting</title>
+    <authors>Brady Holt</authors>
+    <owners>Brady Holt</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://raw.github.com/bradyholt/dbup-sqlserver-scripting/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/bradyholt/dbup-sqlserver-scripting</projectUrl>
+    <iconUrl>https://raw.github.com/DbUp/DbUp/master/src/Information/dbup-icon.png</iconUrl>
+    <description>Extends DbUp to provide SQL Server object definition scripting when running migrations from Visual Studio.  When a database object changes during a migration, its definition will be saved in the project.</description>
+    <releaseNotes>v1.6.0 - Update library versions</releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>dbup database migrations sqlserver scripting definitions scripts console</tags>
+    <dependencies>
+      <dependency id="dbup" version="3.2.1" />
+      <dependency id="dbup-consolescripts" version="1.0.9" />
+      <dependency id="Unofficial.Microsoft.SQLServer.SMO.2014" version="12.0.2000.8" />
+    </dependencies>
+  </metadata>
+</package>
