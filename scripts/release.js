@@ -48,7 +48,7 @@ eval(`nuget pack ${buildDirectory}/pack/${projectId}.nuspec -Properties "version
 let nupkgFile = `${buildDirectory}/${projectId}.${version}.nupkg`;
 
 // Push NuGet package
-eval(`nuget push ${nupkgFile}`)
+eval(`nuget push ${nupkgFile} -Source https://www.nuget.org/api/v2/package`)
 
 // Commit changes to project file
 eval(`git commit -am "New release: ${version}"`);
