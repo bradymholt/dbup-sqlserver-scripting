@@ -50,9 +50,6 @@ let nupkgFile = `${buildDirectory}/${projectId}.${version}.nupkg`;
 // Push NuGet package
 eval(`nuget push ${nupkgFile} -Source https://www.nuget.org/api/v2/package`)
 
-// Commit changes to project file
-eval(`git commit -am "New release: ${version}"`);
-
 // Create release tag
 eval(`git tag -a ${version} -m "${notes}"`);
 eval(`git push --follow-tags`);
