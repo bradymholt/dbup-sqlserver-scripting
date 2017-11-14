@@ -15,9 +15,9 @@
     <copyright>$copyright$</copyright>
     <tags>dbup database migrations sqlserver scripting definitions scripts console</tags>
     <dependencies>
-      <dependency id="dbup" version="3.2.1" />
-      <dependency id="dbup-consolescripts" version="1.0.9"/>
-      <dependency id="Unofficial.Microsoft.SQLServer.SMO.2014" version="12.0.2000.8" />
-    </dependencies>
+      <dependency id="dbup" version="3.3.5"/>
+      <dependency id="dbup-consolescripts" version="1.2.3"/>
+      <dependency id="Microsoft.SqlServer.SqlManagementObjects" version="140.17199.0"/>
+   </dependencies>
   </metadata>
 </package>
