@@ -1,0 +1,1 @@
+Run `./scripts/release.js [version] "[notes]"`.
