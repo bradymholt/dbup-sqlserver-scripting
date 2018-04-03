@@ -120,14 +120,16 @@ namespace DbUp
                 }
                 else
                 {
+	                var scripter = new DbObjectScripter(ConnectionString, m_options, Log); 
+	                scripter.StartWatch(); 
+
                     result = m_engine.PerformUpgrade();
 
                     if (result.Successful
                         && args.Any(a => "--fromconsole".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
                     {
                         this.Log.WriteInformation("Scripting changed database objects...");
-                        var scripter = new DbObjectScripter(this.ConnectionString, m_options, this.Log);
-                        var scriptorResult = scripter.ScriptMigrationTargets(scriptsToExecute);
+	                    scripter.ScriptWatched();
                     }
                 }
             }
