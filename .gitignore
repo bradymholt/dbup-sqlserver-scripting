@@ -10,3 +10,5 @@ build/pack/lib
 build/*.nupkg
 .vs/
 tmp/
+
+*.user
