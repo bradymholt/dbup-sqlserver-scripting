@@ -32,7 +32,7 @@ let version = args[0];
 let notes = args[1];
 let preRelease = version.indexOf("-") > -1; // If version contains a '-' character (i.e. 2.0.0-alpha-1) we will consider this a pre-release
 let projectCopyright = `Copyright ${(new Date).getFullYear()}`;
-let ghRepo = "bradyholt/dbup-sqlserver-scripting";
+let ghRepo = "bradymholt/dbup-sqlserver-scripting";
 let buildDirectory = "tmp";
 
 // Restore NuGet pakcages and build in release mode
