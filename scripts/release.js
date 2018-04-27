@@ -1,4 +1,4 @@
-#!/usr/local/bin/jbash
+#!/usr/bin/env npx jbash
 
 /* Releases dbup-sqlserver-scripting
    This includes: building in release mode, packaging, and publishing on
