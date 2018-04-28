@@ -1,28 +1,26 @@
-﻿using DbUp.Engine;
-using DbUp.Engine.Output;
+﻿using DbUp.Engine.Output;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Configuration;
 using System.Data.SqlClient;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
+using Microsoft.SqlServer.Management.Dmf;
 
 namespace DbUp.Support.SqlServer.Scripting
 {
     public class DbObjectScripter
     {
-        private readonly string m_scrptingObjectRegEx = @"(CREATE|ALTER|DROP)\s*(TABLE|VIEW|PROCEDURE|PROC|FUNCTION|SYNONYM|TYPE) ([\w\[\]\-]+)?\.?([\w\[\]\-]*)";
         private Options m_options;
         private string m_definitionDirectory;
         private SqlConnectionStringBuilder m_connectionBuilder;
         private IUpgradeLog m_log;
+	    private DateTime _lastModifiedDate = DateTime.MinValue;
 
         public DbObjectScripter(string connectionString, Options options, IUpgradeLog log)
         {
@@ -35,149 +33,125 @@ namespace DbUp.Support.SqlServer.Scripting
             EnsureDirectoryExists(m_definitionDirectory);
         }
 
-        public ScripterResult ScriptAll()
-        {
-            ScripterResult result = new ScripterResult();
+	    public void StartWatch()
+	    {
+		    using (var connection = new SqlConnection(m_connectionBuilder.ConnectionString))
+		    {
+			    using (var cmd = new SqlCommand("SELECT SYSDATETIME() as ServerDateTime;", connection))
+			    {
+				    connection.Open();
+				    using (var dr = cmd.ExecuteReader())
+				    {
+					    dr.Read();
+					    _lastModifiedDate = dr.GetDateTime(0);
+				    }
+			    }
+		    }
+	    }
+ 
+	    public ScripterResult ScriptWatched()
+	    {
+		    if (_lastModifiedDate == DateTime.MinValue)
+		    {
+			    throw new InvalidInOperatorException("You need to call \"StartWatch\" before calling \"ScriptWatched\" or use ScriptAll instead!");
+		    }
+ 
+		    return ScriptAllModifiedSince(_lastModifiedDate);
+	    }
+ 
+	    public ScripterResult ScriptAll()
+	    {
+		    return ScriptAllModifiedSince(DateTime.MinValue);
+	    }
 
-            try
-            {
-                //When scripting all object, do scripting in parallel so it will go faster.
-                //We need a DbServerContext for each scripting task since SMO is not thread safe.
+	    protected ScripterResult ScriptAllModifiedSince(DateTime modifiedSince)
+	    {
+		    var result = new ScripterResult();
 
-                var tablesScriptTask = Task.Run(() =>
-                {
-                    var context = GetDatabaseContext(true);
-                    ScriptAllTables(context);
-                });
+		    try
+		    {
+			    // When scripting all object, do scripting in parallel so it will go faster.
+			    // We need a DbServerContext for each scripting task since SMO is not thread safe.
+			    var tablesScriptTask = Task.Run(
+				    () =>
+					    {
+						    var context = GetDatabaseContext(true);
+						    ScriptAllUserTablesModifiedSince(context, modifiedSince);
+					    });
 
-                var viewsScriptTask = Task.Run(() =>
-                {
-                    var context = GetDatabaseContext(true);
-                    ScriptAllViews(context);
-                });
+			    var viewsScriptTask = Task.Run(
+				    () =>
+					    {
+						    var context = GetDatabaseContext(true);
+						    ScriptAllUserViewsModifiedSince(context, modifiedSince);
+					    });
 
-                var storedProceduresScriptTask = Task.Run(() =>
-                {
-                    var context = GetDatabaseContext(true);
-                    ScriptAllStoredProcedures(context);
-                });
+			    var storedProceduresScriptTask = Task.Run(
+				    () =>
+					    {
+						    var context = GetDatabaseContext(true);
+						    ScriptAllUserStoredProceduresModifiedSince(context, modifiedSince);
+					    });
 
-                var synonymsScriptTask = Task.Run(() =>
-                {
-                    var context = GetDatabaseContext(true);
-                    ScriptAllSynonyms(context);
-                });
+			    var functionScriptTask = Task.Run(
+				    () =>
+					    {
+						    var context = GetDatabaseContext(true);
+						    ScriptAllUserFunctionsModifiedSince(context, modifiedSince);
+					    });
 
-                var udtScriptTask = Task.Run(() =>
-                {
-                    var context = GetDatabaseContext(true);
-                    ScriptAllUserDefinedTypes(context);
-                });
+			    var synonymsScriptTask = Task.Run(
+				    () =>
+					    {
+						    var context = GetDatabaseContext(true);
+						    ScriptAllSynonymsModifiedSince(context, modifiedSince);
+					    });
 
-                Task.WaitAll(
-                    tablesScriptTask,
-                    viewsScriptTask,
-                    storedProceduresScriptTask,
-                    synonymsScriptTask,
-                    udtScriptTask
-                );
-            }
-            catch (Exception ex)
-            {
-                result.Successful = false;
-                result.Error = ex;
-            }
+			    var udtScriptTask = Task.Run(
+				    () =>
+					    {
+						    var context = GetDatabaseContext(true);
+						    ScriptAllUserDefinedTypesModifiedSince(context, modifiedSince);
+					    });
 
-            return result;
-        }
+			    Task.WaitAll(
+				    tablesScriptTask,
+				    viewsScriptTask,
+				    storedProceduresScriptTask,
+				    functionScriptTask,
+				    synonymsScriptTask,
+				    udtScriptTask);
+		    }
+		    catch (Exception ex)
+		    {
+			    result.Successful = false;
+			    result.Error = ex;
+		    }
 
-        public ScripterResult ScriptMigrationTargets(IEnumerable<SqlScript> migrationScripts)
-        {
-            Regex targetDbObjectRegex = new Regex(m_scrptingObjectRegEx,
-               RegexOptions.IgnoreCase | RegexOptions.Multiline);
+		    return result;
+	    }
 
-            List<ScriptObject> scriptObjects = new List<ScriptObject>();
-            foreach (SqlScript script in migrationScripts)
-            {
-                //extract db object target(s) from scripts
-                MatchCollection matches = targetDbObjectRegex.Matches(script.Contents);
-                foreach (Match m in matches)
-                {
-                    string objectType = m.Groups[2].Value;
+	    protected void ScriptAllUserTablesModifiedSince(DbServerContext context, DateTime modifiedSince)
+	    {
+		    if ((m_options.ObjectsToInclude & ObjectTypeEnum.Table) == ObjectTypeEnum.Table)
+		    {
+			    var tables = new List<ScriptObject>();
+			    foreach (Table table in context.Database.Tables)
+			    {
+				    if (!table.IsSystemObject && table.DateLastModified > modifiedSince)
+				    {
+					    tables.Add(
+						    new ScriptObject(ObjectTypeEnum.Table, ObjectActionEnum.Create)
+							    {
+								    ObjectName = table.Name,
+								    ObjectSchema = table.Schema
+							    });
+				    }
+			    }
 
-                    ObjectTypeEnum type;
-                    if (Enum.TryParse<ObjectTypeEnum>(objectType, true, out type))
-                    {
-                        ObjectActionEnum action = (ObjectActionEnum)Enum.Parse(typeof(ObjectActionEnum), m.Groups[1].Value, true);
-                        var scriptObject = new ScriptObject(type, action);
-
-                        if (string.IsNullOrEmpty(m.Groups[4].Value) && !string.IsNullOrEmpty(m.Groups[3].Value))
-                        {
-                            //no schema specified
-                            scriptObject.ObjectName = m.Groups[3].Value;
-                        }
-                        else
-                        {
-                            scriptObject.ObjectSchema = m.Groups[3].Value;
-                            scriptObject.ObjectName = m.Groups[4].Value;
-                        }
-
-                        char[] removeCharacters = new char[] { '[', ']' };
-                        scriptObject.ObjectSchema = removeCharacters.Aggregate(scriptObject.ObjectSchema, (c1, c2) => c1.Replace(c2.ToString(), ""));
-                        scriptObject.ObjectName = removeCharacters.Aggregate(scriptObject.ObjectName, (c1, c2) => c1.Replace(c2.ToString(), ""));
-
-                        scriptObjects.Add(scriptObject);
-                    }
-                }
-            }
-
-            return ScriptObjects(scriptObjects);
-        }
-
-        public ScripterResult ScriptObjects(IEnumerable<ScriptObject> objects)
-        {
-            ScripterResult result = new ScripterResult();
-
-            try
-            {
-                var context = GetDatabaseContext(false);
-
-                ScriptTables(context, objects.Where(o => o.ObjectType == ObjectTypeEnum.Table));
-                ScriptViews(context, objects.Where(o => o.ObjectType == ObjectTypeEnum.View));
-                ScriptStoredProcedures(context, objects.Where(o => o.ObjectType == ObjectTypeEnum.Procedure));
-                ScriptFunctions(context, objects.Where(o => o.ObjectType == ObjectTypeEnum.Function));
-                ScriptSynonyms(context, objects.Where(o => o.ObjectType == ObjectTypeEnum.Synonym));
-                ScriptUserDefinedTypes(context, objects.Where(o => o.ObjectType == ObjectTypeEnum.Type));
-            }
-            catch (Exception ex)
-            {
-                result.Successful = false;
-                result.Error = ex;
-            }
-
-            return result;
-        }
-
-        protected void ScriptAllTables(DbServerContext context)
-        {
-            if ((m_options.ObjectsToInclude & ObjectTypeEnum.Table) == ObjectTypeEnum.Table)
-            {
-                List<ScriptObject> tables = new List<ScriptObject>();
-                foreach (Table table in context.Database.Tables)
-                {
-                    if (!table.IsSystemObject)
-                    {
-                        tables.Add(new ScriptObject(ObjectTypeEnum.Table, ObjectActionEnum.Create)
-                        {
-                            ObjectName = table.Name,
-                            ObjectSchema = table.Schema
-                        });
-                    }
-                }
-
-                ScriptTables(context, tables);
-            }
-        }
+			    ScriptTables(context, tables);
+		    }
+	    }
 
         protected void ScriptTables(DbServerContext context, IEnumerable<ScriptObject> tables)
         {
@@ -204,7 +178,7 @@ namespace DbUp.Support.SqlServer.Scripting
             }
         }
 
-		protected void ScriptAllUserDefinedTypes(DbServerContext context) {
+		protected void ScriptAllUserDefinedTypesModifiedSince(DbServerContext context, DateTime modifiedSince) {
 			if ((m_options.ObjectsToInclude & ObjectTypeEnum.Type) == ObjectTypeEnum.Type) {
 				List<ScriptObject> types = new List<ScriptObject>();
 				foreach (UserDefinedType udt in context.Database.UserDefinedTypes) {
@@ -220,7 +194,7 @@ namespace DbUp.Support.SqlServer.Scripting
 					});
 				}
 				foreach (UserDefinedFunction udt in context.Database.UserDefinedFunctions) {
-					if (!udt.IsSystemObject) {
+					if (!udt.IsSystemObject && udt.DateLastModified > modifiedSince) {
 						types.Add(new ScriptObject(ObjectTypeEnum.Type, ObjectActionEnum.Create) {
 							ObjectName = udt.Name,
 							ObjectSchema = udt.Schema
@@ -228,7 +202,7 @@ namespace DbUp.Support.SqlServer.Scripting
 					}
 				}
 				foreach (UserDefinedTableType udt in context.Database.UserDefinedTableTypes) {
-					if (udt.IsUserDefined) {
+					if (udt.IsUserDefined && udt.DateLastModified > modifiedSince) {
 						types.Add(new ScriptObject(ObjectTypeEnum.Type, ObjectActionEnum.Create) {
 							ObjectName = udt.Name,
 							ObjectSchema = udt.Schema
@@ -275,26 +249,27 @@ namespace DbUp.Support.SqlServer.Scripting
 			}
 		}
 
-		protected void ScriptAllViews(DbServerContext context)
-        {
-            if ((m_options.ObjectsToInclude & ObjectTypeEnum.View) == ObjectTypeEnum.View)
-            {
-                List<ScriptObject> views = new List<ScriptObject>();
-                foreach (View view in context.Database.Views)
-                {
-                    if (!view.IsSystemObject)
-                    {
-                        views.Add(new ScriptObject(ObjectTypeEnum.View, ObjectActionEnum.Create)
-                        {
-                            ObjectName = view.Name,
-                            ObjectSchema = view.Schema
-                        });
-                    }
-                }
+	    protected void ScriptAllUserViewsModifiedSince(DbServerContext context, DateTime modifiedSince)
+	    {
+		    if ((m_options.ObjectsToInclude & ObjectTypeEnum.View) == ObjectTypeEnum.View)
+		    {
+			    var views = new List<ScriptObject>();
+			    foreach (View view in context.Database.Views)
+			    {
+				    if (!view.IsSystemObject && view.DateLastModified > modifiedSince)
+				    {
+					    views.Add(
+						    new ScriptObject(ObjectTypeEnum.View, ObjectActionEnum.Create)
+							    {
+								    ObjectName = view.Name,
+								    ObjectSchema = view.Schema
+							    });
+				    }
+			    }
 
-                ScriptViews(context, views);
-            }
-        }
+			    ScriptViews(context, views);
+		    }
+	    }
 
 		protected void ScriptViews(DbServerContext context, IEnumerable<ScriptObject> views)
         {
@@ -320,26 +295,27 @@ namespace DbUp.Support.SqlServer.Scripting
             }
         }
 
-        protected void ScriptAllStoredProcedures(DbServerContext context)
-        {
-            if ((m_options.ObjectsToInclude & ObjectTypeEnum.Procedure) == ObjectTypeEnum.Procedure)
-            {
-                List<ScriptObject> sprocs = new List<ScriptObject>();
-                foreach (StoredProcedure sproc in context.Database.StoredProcedures)
-                {
-                    if (!sproc.IsSystemObject)
-                    {
-                        sprocs.Add(new ScriptObject(ObjectTypeEnum.Procedure, ObjectActionEnum.Create)
-                        {
-                            ObjectName = sproc.Name,
-                            ObjectSchema = sproc.Schema
-                        });
-                    }
-                }
+	    protected void ScriptAllUserStoredProceduresModifiedSince(DbServerContext context, DateTime modifiedSince)
+	    {
+		    if ((m_options.ObjectsToInclude & ObjectTypeEnum.Procedure) == ObjectTypeEnum.Procedure)
+		    {
+			    var sprocs = new List<ScriptObject>();
+			    foreach (StoredProcedure sproc in context.Database.StoredProcedures)
+			    {
+				    if (!sproc.IsSystemObject && sproc.DateLastModified > modifiedSince)
+				    {
+					    sprocs.Add(
+						    new ScriptObject(ObjectTypeEnum.Procedure, ObjectActionEnum.Create)
+							    {
+								    ObjectName = sproc.Name,
+								    ObjectSchema = sproc.Schema
+							    });
+				    }
+			    }
 
-                ScriptStoredProcedures(context, sprocs);
-            }
-        }
+			    ScriptStoredProcedures(context, sprocs);
+		    }
+	    }
 
         protected void ScriptStoredProcedures(DbServerContext context, IEnumerable<ScriptObject> sprocs)
         {
@@ -365,26 +341,28 @@ namespace DbUp.Support.SqlServer.Scripting
             }
         }
 
-        protected void ScriptAllFunctions(DbServerContext context)
-        {
-            if ((m_options.ObjectsToInclude & ObjectTypeEnum.Function) == ObjectTypeEnum.Function)
-            {
-                List<ScriptObject> tables = new List<ScriptObject>();
-                foreach (UserDefinedFunction udf in context.Database.UserDefinedFunctions)
-                {
-                    if (!udf.IsSystemObject)
-                    {
-                        tables.Add(new ScriptObject(ObjectTypeEnum.Function, ObjectActionEnum.Create)
-                        {
-                            ObjectName = udf.Name,
-                            ObjectSchema = udf.Schema
-                        });
-                    }
-                }
 
-                ScriptFunctions(context, tables);
-            }
-        }
+	    protected void ScriptAllUserFunctionsModifiedSince(DbServerContext context, DateTime modifiedSince)
+	    {
+		    if ((m_options.ObjectsToInclude & ObjectTypeEnum.Function) == ObjectTypeEnum.Function)
+		    {
+			    var tables = new List<ScriptObject>();
+			    foreach (UserDefinedFunction udf in context.Database.UserDefinedFunctions)
+			    {
+				    if (!udf.IsSystemObject && udf.DateLastModified > modifiedSince)
+				    {
+					    tables.Add(
+						    new ScriptObject(ObjectTypeEnum.Function, ObjectActionEnum.Create)
+							    {
+								    ObjectName = udf.Name,
+								    ObjectSchema = udf.Schema
+							    });
+				    }
+			    }
+
+			    ScriptFunctions(context, tables);
+		    }
+	    }
 
         protected void ScriptFunctions(DbServerContext context, IEnumerable<ScriptObject> udfs)
         {
@@ -410,23 +388,27 @@ namespace DbUp.Support.SqlServer.Scripting
             }
         }
 
-        protected void ScriptAllSynonyms(DbServerContext context)
-        {
-            if ((m_options.ObjectsToInclude & ObjectTypeEnum.Synonym) == ObjectTypeEnum.Synonym)
-            {
-                List<ScriptObject> synonyms = new List<ScriptObject>();
-                foreach (Synonym synonym in context.Database.Synonyms)
-                {
-                    synonyms.Add(new ScriptObject(ObjectTypeEnum.Synonym, ObjectActionEnum.Create)
-                        {
-                            ObjectName = synonym.Name,
-                            ObjectSchema = synonym.Schema
-                        });
-                }
+	    protected void ScriptAllSynonymsModifiedSince(DbServerContext context, DateTime modifiedSince)
+	    {
+		    if ((m_options.ObjectsToInclude & ObjectTypeEnum.Synonym) == ObjectTypeEnum.Synonym)
+		    {
+			    var synonyms = new List<ScriptObject>();
+			    foreach (Synonym synonym in context.Database.Synonyms)
+			    {
+				    if (synonym.DateLastModified > modifiedSince)
+				    {
+					    synonyms.Add(
+						    new ScriptObject(ObjectTypeEnum.Synonym, ObjectActionEnum.Create)
+							    {
+								    ObjectName = synonym.Name,
+								    ObjectSchema = synonym.Schema
+							    });
+				    }
+			    }
 
-                ScriptSynonyms(context, synonyms);
-            }
-        }
+			    ScriptSynonyms(context, synonyms);
+		    }
+	    }
 
         protected void ScriptSynonyms(DbServerContext context, IEnumerable<ScriptObject> synonyms)
         {
