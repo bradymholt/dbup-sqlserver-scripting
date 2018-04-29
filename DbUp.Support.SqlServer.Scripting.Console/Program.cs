@@ -5,12 +5,14 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using DbUp.Support.SqlServer.Scripting;
+using Microsoft.SqlServer.Management.Smo;
 
 class Program
 {
     static int Main(string[] args)
     {
-        var connectionString = "Server=(localdb)\\v11.0;Integrated Security=true;AttachDbFileName=C:\\Users\\bholt\\DbUpTest.mdf;";
+        var connectionString = "Server=DESKTOP-GRIJAL\\SQLDEVELOPER2017;Trusted_Connection=True;Database=DWQueue;";
 
         var engine =
             DeployChanges.To
@@ -19,7 +21,17 @@ class Program
                 .LogToConsole()
                 .Build();
 
-        ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(connectionString, engine);
+        Options options = new Options()
+        {
+            ScriptingOptions = new ScriptingOptions()
+            {
+                ScriptBatchTerminator = true, //include 'GO' statements at the end of script batches
+            }
+        };
+
+      //  args = new string[] { "--scriptAllDefinitions" };
+
+        ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(connectionString, engine, options);
         var result = upgradeScriptingEngine.Run(args);
 
         if (!result.Successful)
