@@ -18,7 +18,7 @@ namespace DbUp.Support.SqlServer.Scripting
 {
     public class DbObjectScripter
     {
-        private readonly string m_scrptingObjectRegEx = @"(CREATE|ALTER|DROP)\s*(TABLE|VIEW|PROCEDURE|FUNCTION|SYNONYM|TYPE) ([\w\[\]\-]+)?\.?([\w\[\]\-]*)";
+        private readonly string m_scrptingObjectRegEx = @"(CREATE|ALTER|DROP)\s*(TABLE|VIEW|PROCEDURE|PROC|FUNCTION|SYNONYM|TYPE) ([\w\[\]\-]+)?\.?([\w\[\]\-]*)";
         private Options m_options;
         private string m_definitionDirectory;
         private SqlConnectionStringBuilder m_connectionBuilder;
