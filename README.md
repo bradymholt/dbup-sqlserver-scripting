@@ -1,3 +1,20 @@
+# Changes in this fork:
+1. Added support to follow **ScriptBatchTerminator** option so that "Go" statements are added at the end of script batches
+
+For example
+<pre>
+ Options options = new Options()
+        {
+            ScriptingOptions = new ScriptingOptions()
+            {
+                ScriptBatchTerminator = true, //include 'GO' statements at the end of script batches
+            }
+        };
+
+        ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(connectionString, engine, options);
+        var result = upgradeScriptingEngine.Run(args);
+</pre>
+
 # DbUp SQL Server Object Scripting
 [![NuGet version](https://badge.fury.io/nu/dbup-sqlserver-scripting.svg)](https://badge.fury.io/nu/dbup-sqlserver-scripting)
 
