@@ -19,8 +19,12 @@ namespace DbUp.Support.SqlServer.Scripting
 {
     public class DbObjectScripter
     {
-        private const string m_scrptingObjectRegExString = @"(CREATE|ALTER|DROP)\s*(TABLE|VIEW|PROCEDURE|PROC|FUNCTION|SYNONYM|TYPE) ([\w\[\]\-]+)?\.?([\w\[\]\-]*)";
-        private readonly Regex m_targetDbObjectRegex =  new Regex(m_scrptingObjectRegExString, RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        private const string SCRIPTING_OBJECT_REGEX = @"(CREATE|ALTER|DROP|CREATE\s*OR\s*ALTER)\s*(TABLE|VIEW|PROCEDURE|PROC|FUNCTION|SYNONYM|TYPE)\s*I?F?\s*E?X?I?S?T?S?\s*([\w\[\]\-]+)?\.?([\w\[\]\-]*)";
+        private const int REGEX_INDEX_ACTION_TYPE = 1;
+        private const int REGEX_INDEX_OBJECT_TYPE = 2;
+        private const int REGEX_INDEX_SCHEMA_NAME = 3;
+        private const int REGEX_INDEX_OBJECT_NAME = 4;
+        private readonly Regex m_targetDbObjectRegex =  new Regex(SCRIPTING_OBJECT_REGEX, RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
 
         private Options m_options;
         private string m_definitionDirectory;
@@ -115,22 +119,25 @@ namespace DbUp.Support.SqlServer.Scripting
             MatchCollection matches = this.m_targetDbObjectRegex.Matches(script.Contents);
             foreach (Match m in matches)
             {
-                string objectType = m.Groups[2].Value;
-
-                if (Enum.TryParse<ObjectTypeEnum>(objectType, true, out var type))
+                if (Enum.TryParse<ObjectTypeEnum>(m.Groups[REGEX_INDEX_OBJECT_TYPE].Value, true, out var type))
                 {
-                    ObjectActionEnum action = (ObjectActionEnum)Enum.Parse(typeof(ObjectActionEnum), m.Groups[1].Value, true);
+                    // replace CREATE OR ALTER by CREATE
+                    var actionString = m.Groups[REGEX_INDEX_ACTION_TYPE].Value.StartsWith(ObjectActionEnum.Create.ToString(), StringComparison.OrdinalIgnoreCase)
+                                         ? ObjectActionEnum.Create.ToString()
+                                         : m.Groups[REGEX_INDEX_ACTION_TYPE].Value;
+
+                    ObjectActionEnum action = (ObjectActionEnum)Enum.Parse(typeof(ObjectActionEnum), actionString, true);
                     var scriptObject = new ScriptObject(type, action);
 
-                    if (string.IsNullOrEmpty(m.Groups[4].Value) && !string.IsNullOrEmpty(m.Groups[3].Value))
+                    if (string.IsNullOrEmpty(m.Groups[REGEX_INDEX_OBJECT_NAME].Value) && !string.IsNullOrEmpty(m.Groups[REGEX_INDEX_SCHEMA_NAME].Value))
                     {
-                        //no schema specified
-                        scriptObject.ObjectName = m.Groups[3].Value;
+                        //no schema specified. in that case, object name is in the schema group
+                        scriptObject.ObjectName = m.Groups[REGEX_INDEX_SCHEMA_NAME].Value;
                     }
                     else
                     {
-                        scriptObject.ObjectSchema = m.Groups[3].Value;
-                        scriptObject.ObjectName = m.Groups[4].Value;
+                        scriptObject.ObjectSchema = m.Groups[REGEX_INDEX_SCHEMA_NAME].Value;
+                        scriptObject.ObjectName = m.Groups[REGEX_INDEX_OBJECT_NAME].Value;
                     }
 
                     char[] removeCharacters = { '[', ']' };
