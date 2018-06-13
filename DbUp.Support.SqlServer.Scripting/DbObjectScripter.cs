@@ -10,6 +10,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -18,7 +19,9 @@ namespace DbUp.Support.SqlServer.Scripting
 {
     public class DbObjectScripter
     {
-        private readonly string m_scrptingObjectRegEx = @"(CREATE|ALTER|DROP)\s*(TABLE|VIEW|PROCEDURE|PROC|FUNCTION|SYNONYM|TYPE) ([\w\[\]\-]+)?\.?([\w\[\]\-]*)";
+        private const string m_scrptingObjectRegExString = @"(CREATE|ALTER|DROP)\s*(TABLE|VIEW|PROCEDURE|PROC|FUNCTION|SYNONYM|TYPE) ([\w\[\]\-]+)?\.?([\w\[\]\-]*)";
+        private readonly Regex m_targetDbObjectRegex =  new Regex(m_scrptingObjectRegExString, RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+
         private Options m_options;
         private string m_definitionDirectory;
         private SqlConnectionStringBuilder m_connectionBuilder;
@@ -100,45 +103,64 @@ namespace DbUp.Support.SqlServer.Scripting
 
         public ScripterResult ScriptMigrationTargets(IEnumerable<SqlScript> migrationScripts)
         {
-            Regex targetDbObjectRegex = new Regex(m_scrptingObjectRegEx,
-               RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            List<ScriptObject> scriptObjects = new List<ScriptObject>(migrationScripts.SelectMany(this.GetObjectsFromMigrationScripts));
+            scriptObjects = CleanupScriptObjects(scriptObjects);
 
-            List<ScriptObject> scriptObjects = new List<ScriptObject>();
-            foreach (SqlScript script in migrationScripts)
+            return ScriptObjects(scriptObjects);
+        }
+
+        private IEnumerable<ScriptObject> GetObjectsFromMigrationScripts(SqlScript script)
+        {
+            //extract db object target(s) from scripts
+            MatchCollection matches = this.m_targetDbObjectRegex.Matches(script.Contents);
+            foreach (Match m in matches)
             {
-                //extract db object target(s) from scripts
-                MatchCollection matches = targetDbObjectRegex.Matches(script.Contents);
-                foreach (Match m in matches)
+                string objectType = m.Groups[2].Value;
+
+                if (Enum.TryParse<ObjectTypeEnum>(objectType, true, out var type))
                 {
-                    string objectType = m.Groups[2].Value;
+                    ObjectActionEnum action = (ObjectActionEnum)Enum.Parse(typeof(ObjectActionEnum), m.Groups[1].Value, true);
+                    var scriptObject = new ScriptObject(type, action);
 
-                    ObjectTypeEnum type;
-                    if (Enum.TryParse<ObjectTypeEnum>(objectType, true, out type))
+                    if (string.IsNullOrEmpty(m.Groups[4].Value) && !string.IsNullOrEmpty(m.Groups[3].Value))
                     {
-                        ObjectActionEnum action = (ObjectActionEnum)Enum.Parse(typeof(ObjectActionEnum), m.Groups[1].Value, true);
-                        var scriptObject = new ScriptObject(type, action);
-
-                        if (string.IsNullOrEmpty(m.Groups[4].Value) && !string.IsNullOrEmpty(m.Groups[3].Value))
-                        {
-                            //no schema specified
-                            scriptObject.ObjectName = m.Groups[3].Value;
-                        }
-                        else
-                        {
-                            scriptObject.ObjectSchema = m.Groups[3].Value;
-                            scriptObject.ObjectName = m.Groups[4].Value;
-                        }
-
-                        char[] removeCharacters = new char[] { '[', ']' };
-                        scriptObject.ObjectSchema = removeCharacters.Aggregate(scriptObject.ObjectSchema, (c1, c2) => c1.Replace(c2.ToString(), ""));
-                        scriptObject.ObjectName = removeCharacters.Aggregate(scriptObject.ObjectName, (c1, c2) => c1.Replace(c2.ToString(), ""));
-
-                        scriptObjects.Add(scriptObject);
+                        //no schema specified
+                        scriptObject.ObjectName = m.Groups[3].Value;
                     }
+                    else
+                    {
+                        scriptObject.ObjectSchema = m.Groups[3].Value;
+                        scriptObject.ObjectName = m.Groups[4].Value;
+                    }
+
+                    char[] removeCharacters = { '[', ']' };
+                    scriptObject.ObjectSchema = removeCharacters.Aggregate(scriptObject.ObjectSchema, (c1, c2) => c1.Replace(c2.ToString(), ""));
+                    scriptObject.ObjectName = removeCharacters.Aggregate(scriptObject.ObjectName, (c1, c2) => c1.Replace(c2.ToString(), ""));
+
+                    yield return scriptObject;
+                }
+            }
+        }
+        /// <summary>
+        /// Remove duplicates from a list of ScriptObjects to avoid double sripting of files and not run into errors with later droped objects
+        /// </summary>
+        /// <param name="scriptObjects"></param>
+        /// <returns></returns>
+        private static List<ScriptObject> CleanupScriptObjects(List<ScriptObject> scriptObjects)
+        {
+            var preCleanUpScripts = new List<ScriptObject>(scriptObjects);
+            preCleanUpScripts.Reverse();
+
+            var cleanedUpScripts = new List<ScriptObject>();
+            foreach (var script in preCleanUpScripts)
+            {
+                if (!cleanedUpScripts.Any(s => s.FullName.Equals(script.FullName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    cleanedUpScripts.Add(script);
                 }
             }
 
-            return ScriptObjects(scriptObjects);
+            return cleanedUpScripts;
         }
 
         public ScripterResult ScriptObjects(IEnumerable<ScriptObject> objects)
