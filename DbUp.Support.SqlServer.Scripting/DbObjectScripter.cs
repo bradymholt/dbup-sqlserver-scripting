@@ -482,6 +482,10 @@ namespace DbUp.Support.SqlServer.Scripting
                 {
                     sb.Append(str);
                     sb.Append(Environment.NewLine);
+                    if (m_options.ScriptingOptions.ScriptBatchTerminator)
+                    {
+                        sb.Append("GO" + Environment.NewLine + Environment.NewLine);
+                    }
                 }
 
                 m_log.WriteInformation(string.Format("Saving object definition: {0}", Path.Combine(outputDirectory, scriptObject.FileName)));
