@@ -133,7 +133,8 @@ namespace DbUp
                         { 
                             this.Log.WriteInformation("Scripting successfully changed database objects...");
                             var executedScriptsAfterUpgrade = this.m_engine.GetExecutedScripts();
-                            var appliedScripts = scriptsToExecute.Where(s => executedScriptsAfterUpgrade.Except(executedScriptsBeforeUpgrade).Contains(s.Name))
+                            var appliedScripts = scriptsToExecute.Where(s => executedScriptsAfterUpgrade.Except(executedScriptsBeforeUpgrade)
+                                                                                                        .Contains(s.Name));
                             var scriptorResult = scripter.ScriptMigrationTargets(appliedScripts);
                         }
                     }
