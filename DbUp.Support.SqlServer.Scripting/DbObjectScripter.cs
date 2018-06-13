@@ -74,12 +74,19 @@ namespace DbUp.Support.SqlServer.Scripting
                     ScriptAllUserDefinedTypes(context);
                 });
 
+                var functionsScriptTask = Task.Run(() =>
+                {
+                    var context = GetDatabaseContext(true);
+                    this.ScriptAllFunctions(context);
+                });
+
                 Task.WaitAll(
                     tablesScriptTask,
                     viewsScriptTask,
                     storedProceduresScriptTask,
                     synonymsScriptTask,
-                    udtScriptTask
+                    udtScriptTask,
+                    functionsScriptTask
                 );
             }
             catch (Exception ex)
