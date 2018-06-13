@@ -484,8 +484,7 @@ namespace DbUp.Support.SqlServer.Scripting
                     sb.Append(Environment.NewLine);
                     if (m_options.ScriptingOptions.ScriptBatchTerminator)
                     {
-                        sb.Append("GO");
-                        sb.Append(Environment.NewLine);
+                        sb.Append("GO" + Environment.NewLine + Environment.NewLine);
                     }
                 }
 
