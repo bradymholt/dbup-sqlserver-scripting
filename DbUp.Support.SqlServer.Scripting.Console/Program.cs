@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using DbUp.Support.SqlServer.Scripting;
+using Microsoft.SqlServer.Management.Smo;
 
 class Program
 {
@@ -19,7 +21,17 @@ class Program
                 .LogToConsole()
                 .Build();
 
-        ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(connectionString, engine);
+        Options options = new Options()
+        {
+            ScriptingOptions = new ScriptingOptions()
+            {
+                ScriptBatchTerminator = true, //include 'GO' statements at the end of script batches
+            }
+        };
+
+      //  args = new string[] { "--scriptAllDefinitions" };
+
+        ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(connectionString, engine, options);
         var result = upgradeScriptingEngine.Run(args);
 
         if (!result.Successful)

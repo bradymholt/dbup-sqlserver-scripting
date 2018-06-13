@@ -18,7 +18,7 @@ namespace DbUp.Support.SqlServer.Scripting
 {
     public class DbObjectScripter
     {
-        private readonly string m_scrptingObjectRegEx = @"(CREATE|ALTER|DROP)\s*(TABLE|VIEW|PROCEDURE|FUNCTION|SYNONYM|TYPE) ([\w\[\]\-]+)?\.?([\w\[\]\-]*)";
+        private readonly string m_scrptingObjectRegEx = @"(CREATE|ALTER|DROP)\s*(TABLE|VIEW|PROCEDURE|PROC|FUNCTION|SYNONYM|TYPE) ([\w\[\]\-]+)?\.?([\w\[\]\-]*)";
         private Options m_options;
         private string m_definitionDirectory;
         private SqlConnectionStringBuilder m_connectionBuilder;
@@ -483,7 +483,10 @@ namespace DbUp.Support.SqlServer.Scripting
                     sb.Append(str);
                     sb.Append(Environment.NewLine);
                     if (m_options.ScriptingOptions.ScriptBatchTerminator)
-                        sb.Append("GO" + Environment.NewLine + Environment.NewLine);
+                    {
+                        sb.Append("GO");
+                        sb.Append(Environment.NewLine);
+                    }
                 }
 
                 m_log.WriteInformation(string.Format("Saving object definition: {0}", Path.Combine(outputDirectory, scriptObject.FileName)));
