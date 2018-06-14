@@ -46,6 +46,7 @@ namespace DbUp.Support.SqlServer.Scripting
         public string FolderNameProcedures { get; set; }
         public string FolderNameFunctions { get; set; }
         public string FolderNameSynonyms { get; set; }
+        public bool ScriptBatchTerminator { get; set; }
         public ObjectTypeEnum ObjectsToInclude { get; set; }
     }
 }

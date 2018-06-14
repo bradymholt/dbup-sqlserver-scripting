@@ -120,14 +120,24 @@ namespace DbUp
                 }
                 else
                 {
+                    var executedScriptsBeforeUpgrade = this.m_engine.GetExecutedScripts();
                     result = m_engine.PerformUpgrade();
-
-                    if (result.Successful
-                        && args.Any(a => "--fromconsole".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
+                    if (args.Any(a => "--fromconsole".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        this.Log.WriteInformation("Scripting changed database objects...");
-                        var scripter = new DbObjectScripter(this.ConnectionString, m_options, this.Log);
-                        var scriptorResult = scripter.ScriptMigrationTargets(scriptsToExecute);
+                        var scripter = new DbObjectScripter(this.ConnectionString, this.m_options, this.Log);
+                        if (result.Successful)
+                        {
+                            this.Log.WriteInformation("Scripting changed database objects...");
+                            var scriptorResult = scripter.ScriptMigrationTargets(scriptsToExecute);
+                        } 
+                        else
+                        { 
+                            this.Log.WriteInformation("Scripting successfully changed database objects...");
+                            var executedScriptsAfterUpgrade = this.m_engine.GetExecutedScripts();
+                            var appliedScripts = scriptsToExecute.Where(s => executedScriptsAfterUpgrade.Except(executedScriptsBeforeUpgrade)
+                                                                                                        .Contains(s.Name));
+                            var scriptorResult = scripter.ScriptMigrationTargets(appliedScripts);
+                        }
                     }
                 }
             }
