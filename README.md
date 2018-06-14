@@ -69,6 +69,7 @@ The following SQL Server object types are currently supported:
 * Stored Procedures
 * User Defined Functions
 * Synonyms
+* User Defined Types
 
 ## Script All Definitions
 You can run `Start-DatabaseScript` from the Package Manager Console to script all objects in the database.  If working with an existing database, it is recommended to run this command initially so that all your definition files are saved.  
