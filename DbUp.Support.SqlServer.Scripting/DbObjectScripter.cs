@@ -19,14 +19,14 @@ namespace DbUp.Support.SqlServer.Scripting
 {
     public class DbObjectScripter
     {
-        private const string SCRIPTING_OBJECT_REGEX = @"((CREATE|ALTER|DROP|CREATE\s*OR\s*ALTER)\s*(TABLE|VIEW|PROCEDURE|PROC|FUNCTION|SYNONYM|TYPE)\s*I?F?\s*E?X?I?S?T?S?\s*([\w\[\]\-]+)?\.?([\w\[\]\-]*))|(sp_rename{1,1}\s*'([\w\[\]\-]+)?\.?([\w\[\]\-]*)'\s*,\s*'([\w\[\]\-]*)')";
+        private const string SCRIPTING_OBJECT_REGEX = @"((CREATE|ALTER|DROP|CREATE\s*OR\s*ALTER)\s*(TABLE|VIEW|PROCEDURE|PROC|FUNCTION|SYNONYM|TYPE|TRIGGER|)\s*(IF?\s*EXISTS? | \s*)\s*([\w\[\]\-]+)?\.?([\w\[\]\-]*))|(sp_rename{1,1}\s*'([\w\[\]\-]+)?\.?([\w\[\]\-]*)'\s*,\s*'([\w\[\]\-]*)')";
         private const int REGEX_INDEX_ACTION_TYPE = 2;
         private const int REGEX_INDEX_OBJECT_TYPE = 3;
-        private const int REGEX_INDEX_SCHEMA_NAME = 4;
-        private const int REGEX_INDEX_OBJECT_NAME = 5;
-        private const int REGEX_INDEX_OBJECT_RENAME_SCHEMA = 7;
-        private const int REGEX_INDEX_OBJECT_RENAME_OLD_NAME = 8;
-        private const int REGEX_INDEX_OBJECT_RENAME_NEW_NAME = 9;
+        private const int REGEX_INDEX_SCHEMA_NAME = 5;
+        private const int REGEX_INDEX_OBJECT_NAME = 6;
+        private const int REGEX_INDEX_OBJECT_RENAME_SCHEMA = 8;
+        private const int REGEX_INDEX_OBJECT_RENAME_OLD_NAME = 9;
+        private const int REGEX_INDEX_OBJECT_RENAME_NEW_NAME = 10;
         private readonly Regex m_targetDbObjectRegex =  new Regex(SCRIPTING_OBJECT_REGEX, RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
 
         private Options m_options;
