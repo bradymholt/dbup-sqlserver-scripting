@@ -4,6 +4,7 @@
     <TargetFrameworks>net45;netcoreapp2.0</TargetFrameworks>
 	<AssemblyName>DbUp.Support.SqlServer.Scripting</AssemblyName>
     <RootNamespace>DbUp.Support.SqlServer.Scripting</RootNamespace>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
