@@ -82,9 +82,9 @@ The following list shows which statement types are currently supported:
 * Renaming with sp_rename
 
 ## Known Issues
-* Renaming with sp_rename
-** Only the renaming of objects itself (like table, view, procedures, etc.) is supported, but not the renaming of columns, indexes, keys
-** When dropping or again renaming an object after it has been renamed with sp_rename, those objects can not be properly scripted
+- Renaming with sp_rename
+  - Only the renaming of objects itself (like table, view, procedures, etc.) is supported, but not the renaming of columns, indexes, keys
+  - When dropping or again renaming an object after it has been renamed with sp_rename, those objects can not be properly scripted
 
 ## Script All Definitions
 You can run `Start-DatabaseScript` from the Package Manager Console to script all objects in the database.  If working with an existing database, it is recommended to run this command initially so that all your definition files are saved.  
