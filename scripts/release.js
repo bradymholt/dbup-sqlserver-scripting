@@ -28,29 +28,27 @@ if ($(`git status --porcelain`)) {
 
 let projectId = "dbup-sqlserver-scripting";
 let projectName = "DbUp.Support.SqlServer.Scripting";
-let libCsproj = "DbUp.Support.SqlServer.Scripting/DbUp.Support.SqlServer.Scripting.csproj"
 let version = args[0];
 let notes = args[1];
 let preRelease = version.indexOf("-") > -1; // If version contains a '-' character (i.e. 2.0.0-alpha-1) we will consider this a pre-release
 let projectCopyright = `Copyright ${(new Date).getFullYear()}`;
 let ghRepo = "bradymholt/dbup-sqlserver-scripting";
-let buildDir = "tmp";
+let buildDirectory = "tmp";
 
-// Build, pack, and push to NuGet
-eval(`dotnet build -c release ${libCsproj}`);
-eval(`dotnet pack -c release --no-build ${libCsproj}`);
-eval(`dotnet nuget push ${buildDir}/${nupkgFile} -k ${env.NUGET_API_KEY}`);
+// Restore NuGet pakcages and build in release mode
+eval(`nuget restore`);
+eval(`xbuild /property:Configuration=Release ${projectName}.sln`);
 
 // Create NuGet package
-eval(`mkdir -p ${buildDir}/pack/lib/net35`)
+eval(`mkdir -p ${buildDirectory}/pack/lib/net35`)
 eval(`cp dbup-sqlserver-scripting.nuspec tmp/pack`)
-eval(`cp -r tools dbup-sqlserver-scripting.nuspec ${buildDir}/pack/`)
-eval(`cp -r ${projectName}/bin/Release/${projectName}.* ${buildDir}/pack/lib/net35`)
-eval(`nuget pack ${buildDir}/pack/${projectId}.nuspec -Properties "version=${version};notes=v${version} - ${notes};copyright=${projectCopyright}" -OutputDirectory ${buildDir}`)
-let nupkgFile = `${buildDir}/${projectId}.${version}.nupkg`;
+eval(`cp -r tools dbup-sqlserver-scripting.nuspec ${buildDirectory}/pack/`)
+eval(`cp -r ${projectName}/bin/Release/${projectName}.* ${buildDirectory}/pack/lib/net35`)
+eval(`nuget pack ${buildDirectory}/pack/${projectId}.nuspec -Properties "version=${version};notes=v${version} - ${notes};copyright=${projectCopyright}" -OutputDirectory ${buildDirectory}`)
+let nupkgFile = `${buildDirectory}/${projectId}.${version}.nupkg`;
 
-// Commit changes to project file
-eval(`git commit -am "New release: ${version}"`);
+// Push NuGet package
+eval(`nuget push ${nupkgFile} -Source https://www.nuget.org/api/v2/package`)
 
 // Create release tag
 eval(`git tag -a ${version} -m "${notes}"`);
@@ -69,6 +67,6 @@ eval(`curl -H "Authorization: token ${env.GITHUB_API_TOKEN}" -H "Content-Type: a
   --data-binary @"${nupkgFile}" \
   https://uploads.github.com/repos/${ghRepo}/releases/${releaseId}/assets?name=${nupkgFile}`);
 
-eval(`rm -r ${buildDir}`)
+eval(`rm -r ${buildDirectory}`)
 
 echo(`DONE!  Released version ${version} to NuGet and GitHub.`);
