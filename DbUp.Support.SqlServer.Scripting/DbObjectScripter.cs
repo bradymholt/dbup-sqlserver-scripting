@@ -125,8 +125,17 @@ namespace DbUp.Support.SqlServer.Scripting
                 //if this group is empty, it means the second part of the regex matched (sp_rename)
                 if (!string.IsNullOrEmpty(m.Groups[REGEX_INDEX_ACTION_TYPE].Value)) 
                 {
-                    
-                    if (Enum.TryParse<ObjectTypeEnum>(m.Groups[REGEX_INDEX_OBJECT_TYPE].Value, true, out var type))
+                    if (!Enum.TryParse<ObjectTypeEnum>(m.Groups[REGEX_INDEX_OBJECT_TYPE].Value, true, out var type))
+                    {
+                        //We're adjusting for "PROC" vs "PROCEDURE" since we're checking for it in m_targetDbObjectRegex but it's not an enum member ( "PROCEDURE|PROC" )
+                        if (m.Groups[REGEX_INDEX_OBJECT_TYPE].Value.Equals("PROC", StringComparison.OrdinalIgnoreCase))
+                        {
+                            type = ObjectTypeEnum.Procedure;
+                        }
+                        //else it's ObjectTypeEnum.Undefined
+                    }
+
+                    if (type != ObjectTypeEnum.Undefined)
                     {
                         //replace CREATE OR ALTER by CREATE
                         var actionString = m.Groups[REGEX_INDEX_ACTION_TYPE].Value.StartsWith(ObjectActionEnum.Create.ToString(), StringComparison.OrdinalIgnoreCase)
