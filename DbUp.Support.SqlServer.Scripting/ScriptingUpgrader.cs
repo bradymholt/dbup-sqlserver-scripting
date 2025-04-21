@@ -87,18 +87,18 @@ public class ScriptingUpgrader
 
     public DatabaseUpgradeResult ScriptAll()
     {
-        this.Log.WriteInformation("Scripting all database object definitions...");
+        this.Log.LogInformation("Scripting all database object definitions...");
 
         if (this.ConnectionString == null)
         {
-            return new DatabaseUpgradeResult(Enumerable.Empty<SqlScript>(), false,
-                new Exception("connectionString could not be determined"));
+            return new DatabaseUpgradeResult([], false,
+                new Exception("connectionString could not be determined"), null);
         }
 
         var scripter = new DbObjectScripter(this.ConnectionString, m_options, this.Log);
         scripter.ScriptAll();
 
-        return new DatabaseUpgradeResult(new List<SqlScript>(), true, null);
+        return new DatabaseUpgradeResult(new List<SqlScript>(), true, null, null);
     }
 
     public DatabaseUpgradeResult Run(
@@ -116,11 +116,11 @@ public class ScriptingUpgrader
 
             if (args.Any(a => "--whatIf".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
             {
-                result = new DatabaseUpgradeResult(Enumerable.Empty<SqlScript>(), true, null);
+                result = new DatabaseUpgradeResult([], true, null, null);
 
-                this.Log.WriteWarning("WHATIF Mode!");
-                this.Log.WriteWarning("The following scripts would have been executed:");
-                scriptsToExecute.ForEach(r => this.Log.WriteWarning(r.Name));
+                this.Log.LogWarning("WHATIF Mode!");
+                this.Log.LogWarning("The following scripts would have been executed:");
+                scriptsToExecute.ForEach(r => this.Log.LogWarning(r.Name));
             }
             else
             {
@@ -131,12 +131,12 @@ public class ScriptingUpgrader
                     var scripter = new DbObjectScripter(this.ConnectionString, this.m_options, this.Log);
                     if (result.Successful)
                     {
-                        this.Log.WriteInformation("Scripting changed database objects...");
+                        this.Log.LogInformation("Scripting changed database objects...");
                         var scriptorResult = scripter.ScriptMigrationTargets(scriptsToExecute);
                     }
                     else
                     {
-                        this.Log.WriteInformation("Scripting successfully changed database objects...");
+                        this.Log.LogInformation("Scripting successfully changed database objects...");
                         var executedScriptsAfterUpgrade = this.m_engine.GetExecutedScripts();
                         var appliedScripts = scriptsToExecute.Where(s => executedScriptsAfterUpgrade
                             .Except(executedScriptsBeforeUpgrade)

@@ -690,7 +690,7 @@ public class DbObjectScripter
         }
         catch (Exception ex)
         {
-            m_log.WriteError(string.Format("Error when scripting definition for {0}.{1}: {2}", dbObject.ObjectSchema,
+            m_log.LogError(string.Format("Error when scripting definition for {0}.{1}: {2}", dbObject.ObjectSchema,
                 dbObject.ObjectName, ex.Message));
         }
     }
@@ -701,7 +701,7 @@ public class DbObjectScripter
     {
         foreach (var dbObject in dbObjects)
         {
-            m_log.WriteWarning(string.Format(
+            m_log.LogWarning(string.Format(
                 "The object {0}.{1} could not be scripted, since the object type was not identifyable. Normally this means, that the object has been dropped in the meantime. If necessary delete the file manually.",
                 dbObject.ObjectSchema, dbObject.ObjectName));
         }
@@ -731,13 +731,13 @@ public class DbObjectScripter
                 }
             }
 
-            m_log.WriteInformation(string.Format("Saving object definition: {0}",
+            m_log.LogInformation(string.Format("Saving object definition: {0}",
                 Path.Combine(outputDirectory, scriptObject.FileName)));
             File.WriteAllText(Path.Combine(outputDirectory, scriptObject.FileName), sb.ToString());
         }
         catch (Exception ex)
         {
-            m_log.WriteError(string.Format("Error when saving script file {0}: {1}", scriptObject.FullName,
+            m_log.LogError(string.Format("Error when saving script file {0}: {1}", scriptObject.FullName,
                 ex.Message));
         }
     }
@@ -752,13 +752,13 @@ public class DbObjectScripter
             string filePath = Path.Combine(outputDirectory, scriptObject.FileName);
             if (File.Exists(filePath))
             {
-                m_log.WriteInformation(string.Format("Deleting object definition: {0}", filePath));
+                m_log.LogInformation(string.Format("Deleting object definition: {0}", filePath));
                 File.Delete(filePath);
             }
         }
         catch (Exception ex)
         {
-            m_log.WriteError(string.Format("Error when deleting script file {0}: {1}", scriptObject.FullName,
+            m_log.LogError(string.Format("Error when deleting script file {0}: {1}", scriptObject.FullName,
                 ex.Message));
         }
     }
