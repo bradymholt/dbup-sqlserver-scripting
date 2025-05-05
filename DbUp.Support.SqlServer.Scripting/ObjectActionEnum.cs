@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace DbUp.Support.SqlServer.Scripting;
 
-namespace DbUp.Support.SqlServer.Scripting
+public enum ObjectActionEnum
 {
-    public enum ObjectActionEnum
-    {
-        Create,
-        Alter,
-        Drop
-    }
+    Create,
+    Alter,
+    Drop
 }

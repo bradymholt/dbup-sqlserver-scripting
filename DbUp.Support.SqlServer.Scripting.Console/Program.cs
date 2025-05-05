@@ -1,38 +1,30 @@
-﻿using DbUp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// See https://aka.ms/new-console-template for more information
+
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using DbUp;
 
-class Program
+var connectionString =
+    "Server=(localdb)\\v11.0;Integrated Security=true;AttachDbFileName=C:\\Users\\bholt\\DbUpTest.mdf;";
+
+var engine =
+    DeployChanges.To
+        .SqlDatabase(connectionString)
+        .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
+        .LogToConsole()
+        .Build();
+
+ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(connectionString, engine);
+var result = upgradeScriptingEngine.Run(args);
+
+if (!result.Successful)
 {
-    static int Main(string[] args)
-    {
-        var connectionString = "Server=(localdb)\\v11.0;Integrated Security=true;AttachDbFileName=C:\\Users\\bholt\\DbUpTest.mdf;";
-
-        var engine =
-            DeployChanges.To
-                .SqlDatabase(connectionString)
-                .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
-                .LogToConsole()
-                .Build();
-
-        ScriptingUpgrader upgradeScriptingEngine = new ScriptingUpgrader(connectionString, engine);
-        var result = upgradeScriptingEngine.Run(args);
-
-        if (!result.Successful)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(result.Error);
-            Console.ResetColor();
-            return -1;
-        }
-
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Success!");
-        Console.ResetColor();
-        return 0;
-    }
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine(result.Error);
+    Console.ResetColor();
+    return -1;
 }
+
+Console.ForegroundColor = ConsoleColor.Green;
+Console.WriteLine("Success!");
+Console.ResetColor();
+return 0;

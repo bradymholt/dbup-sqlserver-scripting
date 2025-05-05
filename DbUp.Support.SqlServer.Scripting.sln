@@ -1,12 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbUp.Support.SqlServer.Scripting", "DbUp.Support.SqlServer.Scripting\DbUp.Support.SqlServer.Scripting.csproj", "{A1EC7074-3C1D-4424-BC80-8BF770758774}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbUp.Support.SqlServer.Scripting.Console", "DbUp.Support.SqlServer.Scripting.Console\DbUp.Support.SqlServer.Scripting.Console.csproj", "{80136911-3220-460B-867D-E1C94E241248}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{36C31DC9-4037-4B0B-B205-F9B9655C9232}"
 	ProjectSection(SolutionItems) = preProject
 		build\tools\dbup-sqlserver-scripting.psm1 = build\tools\dbup-sqlserver-scripting.psm1
@@ -22,22 +18,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{41BE4E
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbUp.Support.SqlServer.Scripting", "DbUp.Support.SqlServer.Scripting\DbUp.Support.SqlServer.Scripting.csproj", "{1D0FA2E6-BE06-44E9-A0DB-A625EC86FF72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbUp.Support.SqlServer.Scripting.Console", "DbUp.Support.SqlServer.Scripting.Console\DbUp.Support.SqlServer.Scripting.Console.csproj", "{25A768D1-EA1B-4FA4-8E5A-A10DA90C8859}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A1EC7074-3C1D-4424-BC80-8BF770758774}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1EC7074-3C1D-4424-BC80-8BF770758774}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A1EC7074-3C1D-4424-BC80-8BF770758774}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A1EC7074-3C1D-4424-BC80-8BF770758774}.Release|Any CPU.Build.0 = Release|Any CPU
-		{80136911-3220-460B-867D-E1C94E241248}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{80136911-3220-460B-867D-E1C94E241248}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{80136911-3220-460B-867D-E1C94E241248}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{80136911-3220-460B-867D-E1C94E241248}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D0FA2E6-BE06-44E9-A0DB-A625EC86FF72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D0FA2E6-BE06-44E9-A0DB-A625EC86FF72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D0FA2E6-BE06-44E9-A0DB-A625EC86FF72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D0FA2E6-BE06-44E9-A0DB-A625EC86FF72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25A768D1-EA1B-4FA4-8E5A-A10DA90C8859}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25A768D1-EA1B-4FA4-8E5A-A10DA90C8859}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25A768D1-EA1B-4FA4-8E5A-A10DA90C8859}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25A768D1-EA1B-4FA4-8E5A-A10DA90C8859}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {45B4DB37-C09B-4085-9F47-7BB05CCC22C2}
 	EndGlobalSection
 EndGlobal

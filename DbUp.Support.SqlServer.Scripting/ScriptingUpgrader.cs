@@ -1,148 +1,152 @@
-﻿using DbUp;
-using DbUp.Builder;
+﻿using DbUp.Builder;
 using DbUp.Engine;
 using DbUp.Engine.Output;
-using DbUp.Support.SqlServer;
 using DbUp.Support.SqlServer.Scripting;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data;
 
-namespace DbUp
+namespace DbUp;
+
+public class ScriptingUpgrader
 {
-    public class ScriptingUpgrader
+    UpgradeEngine m_engine;
+    Options m_options;
+
+    public ScriptingUpgrader(
+        string connectionString,
+        UpgradeEngine engine,
+        Options options
+        )
     {
-        UpgradeEngine m_engine;
-        Options m_options;
+        m_engine = engine;
+        m_options = options;
+        m_connectionString = connectionString;
+    }
 
-        public ScriptingUpgrader(string connectionString, UpgradeEngine engine, Options options)
-        {
-            m_engine = engine;
-            m_options = options;
-            m_connectionString = connectionString;
-        }
+    public ScriptingUpgrader(
+        string connectionString,
+        UpgradeEngine engine
+        )
+        : this(connectionString, engine, new Options())
+    {
+    }
 
-        public ScriptingUpgrader(string connectionString, UpgradeEngine engine)
-            : this(connectionString, engine, new Options())
-        {
-        }
+    UpgradeConfiguration m_configuration;
 
-        UpgradeConfiguration m_configuration;
-        UpgradeConfiguration UpgradeConfiguration
+    UpgradeConfiguration UpgradeConfiguration
+    {
+        get
         {
-            get
+            if (m_configuration == null)
             {
-                if (m_configuration == null)
-                {
-                    //configuration field on UpgradeEngine is private so we need to use reflection to break in
-                    var field = typeof(UpgradeEngine).GetField("configuration", BindingFlags.NonPublic | BindingFlags.Instance);
-                    m_configuration = (UpgradeConfiguration)field.GetValue(m_engine);
-                }
-
-                return m_configuration;
+                //configuration field on UpgradeEngine is private so we need to use reflection to break in
+                var field = typeof(UpgradeEngine).GetField("configuration",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                m_configuration = (UpgradeConfiguration)field.GetValue(m_engine);
             }
+
+            return m_configuration;
         }
+    }
 
-        IUpgradeLog m_log;
-        IUpgradeLog Log
+    IUpgradeLog m_log;
+
+    IUpgradeLog Log
+    {
+        get
         {
-            get
+            if (m_log == null)
             {
-                if (m_log == null)
-                {
-                    m_log = this.UpgradeConfiguration.Log;
-                }
-
-                return m_log;
+                m_log = this.UpgradeConfiguration.Log;
             }
-        }
 
-        readonly string m_connectionString;
-        string ConnectionString
+            return m_log;
+        }
+    }
+
+    readonly string m_connectionString;
+
+    string ConnectionString
+    {
+        get
         {
-            get
-            {
-                /* if (m_connectionString == null)
-                 { 
-                     var connectionManager = this.UpgradeConfiguration.ConnectionManager;
-                     if (connectionManager is SqlConnectionManager)
-                     {
-                         // this does not work in dbup 3.2.4
-                         //connectionString field is private on SqlConnectionManager so we need to use reflection to break in
-                         var field = typeof(SqlConnectionManager).GetField("connectionString", BindingFlags.NonPublic | BindingFlags.Instance);
-                         m_connectionString = (string)field.GetValue((SqlConnectionManager)connectionManager);
-                     }
+            /* if (m_connectionString == null)
+             {
+                 var connectionManager = this.UpgradeConfiguration.ConnectionManager;
+                 if (connectionManager is SqlConnectionManager)
+                 {
+                     // this does not work in dbup 3.2.4
+                     //connectionString field is private on SqlConnectionManager so we need to use reflection to break in
+                     var field = typeof(SqlConnectionManager).GetField("connectionString", BindingFlags.NonPublic | BindingFlags.Instance);
+                     m_connectionString = (string)field.GetValue((SqlConnectionManager)connectionManager);
                  }
-                 */
-                return m_connectionString;
-            }
+             }
+             */
+            return m_connectionString;
+        }
+    }
+
+    public DatabaseUpgradeResult ScriptAll()
+    {
+        this.Log.LogInformation("Scripting all database object definitions...");
+
+        if (this.ConnectionString == null)
+        {
+            return new DatabaseUpgradeResult([], false,
+                new Exception("connectionString could not be determined"), null);
         }
 
-        public DatabaseUpgradeResult ScriptAll()
+        var scripter = new DbObjectScripter(this.ConnectionString, m_options, this.Log);
+        scripter.ScriptAll();
+
+        return new DatabaseUpgradeResult(new List<SqlScript>(), true, null, null);
+    }
+
+    public DatabaseUpgradeResult Run(
+        string[] args
+        )
+    {
+        DatabaseUpgradeResult result = null;
+        if (args.Any(a => "--scriptAllDefinitions".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
         {
-            this.Log.WriteInformation("Scripting all database object definitions...");
-
-            if (this.ConnectionString == null)
-            {
-                return new DatabaseUpgradeResult(Enumerable.Empty<SqlScript>(), false, new Exception("connectionString could not be determined"));
-            }
-
-            var scripter = new DbObjectScripter(this.ConnectionString, m_options, this.Log);
-            scripter.ScriptAll();
-
-            return new DatabaseUpgradeResult(new List<SqlScript>(), true, null);
+            result = ScriptAll();
         }
-
-        public DatabaseUpgradeResult Run(string[] args)
+        else
         {
-            DatabaseUpgradeResult result = null;
-            if (args.Any(a => "--scriptAllDefinitions".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
+            var scriptsToExecute = m_engine.GetScriptsToExecute();
+
+            if (args.Any(a => "--whatIf".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
             {
-                result = ScriptAll();
+                result = new DatabaseUpgradeResult([], true, null, null);
+
+                this.Log.LogWarning("WHATIF Mode!");
+                this.Log.LogWarning("The following scripts would have been executed:");
+                scriptsToExecute.ForEach(r => this.Log.LogWarning(r.Name));
             }
             else
             {
-                var scriptsToExecute = m_engine.GetScriptsToExecute();
-
-                if (args.Any(a => "--whatIf".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
+                var executedScriptsBeforeUpgrade = this.m_engine.GetExecutedScripts();
+                result = m_engine.PerformUpgrade();
+                if (args.Any(a => "--fromconsole".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    result = new DatabaseUpgradeResult(Enumerable.Empty<SqlScript>(), true, null);
-
-                    this.Log.WriteWarning("WHATIF Mode!");
-                    this.Log.WriteWarning("The following scripts would have been executed:");
-                    scriptsToExecute.ForEach(r => this.Log.WriteWarning(r.Name));
-                }
-                else
-                {
-                    var executedScriptsBeforeUpgrade = this.m_engine.GetExecutedScripts();
-                    result = m_engine.PerformUpgrade();
-                    if (args.Any(a => "--fromconsole".Equals(a.Trim(), StringComparison.InvariantCultureIgnoreCase)))
+                    var scripter = new DbObjectScripter(this.ConnectionString, this.m_options, this.Log);
+                    if (result.Successful)
                     {
-                        var scripter = new DbObjectScripter(this.ConnectionString, this.m_options, this.Log);
-                        if (result.Successful)
-                        {
-                            this.Log.WriteInformation("Scripting changed database objects...");
-                            var scriptorResult = scripter.ScriptMigrationTargets(scriptsToExecute);
-                        } 
-                        else
-                        { 
-                            this.Log.WriteInformation("Scripting successfully changed database objects...");
-                            var executedScriptsAfterUpgrade = this.m_engine.GetExecutedScripts();
-                            var appliedScripts = scriptsToExecute.Where(s => executedScriptsAfterUpgrade.Except(executedScriptsBeforeUpgrade)
-                                                                                                        .Contains(s.Name));
-                            var scriptorResult = scripter.ScriptMigrationTargets(appliedScripts);
-                        }
+                        this.Log.LogInformation("Scripting changed database objects...");
+                        var scriptorResult = scripter.ScriptMigrationTargets(scriptsToExecute);
+                    }
+                    else
+                    {
+                        this.Log.LogInformation("Scripting successfully changed database objects...");
+                        var executedScriptsAfterUpgrade = this.m_engine.GetExecutedScripts();
+                        var appliedScripts = scriptsToExecute.Where(s => executedScriptsAfterUpgrade
+                            .Except(executedScriptsBeforeUpgrade)
+                            .Contains(s.Name));
+                        var scriptorResult = scripter.ScriptMigrationTargets(appliedScripts);
                     }
                 }
             }
-
-            return result;
         }
+
+        return result;
     }
 }
